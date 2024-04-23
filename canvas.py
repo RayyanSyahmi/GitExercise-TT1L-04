@@ -24,7 +24,15 @@ class PaintCanvas(QtWidgets.QLabel):
 
         #connects the textChanged signal to the update_brush_size method
         self.brush_size_input.brush_size_input.textChanged.connect(self.update_brush_size)
+    def resizeEvent(self, event):
+        pixmap = QtGui.QPixmap(self.width(), self.height())
+        pixmap.fill(QtCore.Qt.white)
+        painter = QtGui.QPainter(pixmap)
+        painter.drawPixmap(0, 0, self.pixmap())
+        painter.end()
+        self.setPixmap(pixmap)
 
+        self.update()
     def update_brush_size(self, text):
         try:
             self.brush.size = int(text)

@@ -7,12 +7,11 @@ def save_file():
               ("Png Files", "*.png"),
               ("Jpeg Files", "*.jpg *.jpeg")]
 
-    file_path = QFileDialog.asksavesfilename(title = "Custom Save Title",
+    file_path = QFileDialog.str(title = "Custom Save Title",
                                              filetypes= types, initialdir=".")
-    data = entry.get() # type: ignore
+    data = Entry.txt()  # type: ignore
 
     if file_path != "":
-        file_writter = open(file_path, mode = 'W')
+        file_writter = open(file_path, mode = 'w')
         file_writter.writter(data)
         file_writter.close()
-    

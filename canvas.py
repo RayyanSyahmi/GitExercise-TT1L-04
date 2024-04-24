@@ -7,38 +7,34 @@ class PaintCanvas(QtWidgets.QLabel):
         super().__init__()
 
         self.setPixmap(QtGui.QPixmap(800, 600))
-        self.pixmap().fill(QtCore.Qt.white)
         self.showMaximized()
 
-        self.last_pos = None
         self.brush = Brush()
-
         self.brush_size_input = BrushSizeInput(self.brush)
-        self.brush_size_input.setGeometry(10, 10, 80, 20)
 
         layout = QtWidgets.QHBoxLayout()
         layout.addWidget(self.brush_size_input)
         self.setLayout(layout)
 
-        self.resizeEvent = self.resizeEvent
-
-        #connects the textChanged signal to the update_brush_size method
         self.brush_size_input.brush_size_input.textChanged.connect(self.update_brush_size)
+    
     def resizeEvent(self, event):
         pixmap = QtGui.QPixmap(self.width(), self.height())
         pixmap.fill(QtCore.Qt.white)
+
         painter = QtGui.QPainter(pixmap)
-        painter.drawPixmap(0, 0, self.pixmap())
         painter.end()
         self.setPixmap(pixmap)
-
+        
         self.update()
+    
     def update_brush_size(self, text):
         try:
             self.brush.size = int(text)
             self.brush.set_size(self.brush.size)
         except ValueError:
             pass
+    
     def update_brush_size(self, text):
         try:
             self.brush.size = int(text)

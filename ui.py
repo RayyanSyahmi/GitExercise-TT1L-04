@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication, QInputDialog, QAction, QColorDialog, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider
+from PyQt5.QtWidgets import QHBoxLayout, QMainWindow, QApplication, QInputDialog, QAction, QColorDialog, QPushButton, QSizePolicy, QSpacerItem, QVBoxLayout, QWidget, QLabel, QSlider
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -26,6 +26,8 @@ class MainWindow(QMainWindow):
         self.sidebar_layout.addWidget(tool_label)
 
         brush_button = QPushButton('Brush')
+        brush_button.setFixedHeight(30)
+        brush_button.setFixedWidth(80)
         brush_button.clicked.connect(self.show_brush_settings)
         self.sidebar_layout.addWidget(brush_button)
 
@@ -59,6 +61,8 @@ class MainWindow(QMainWindow):
         self.sidebar_layout.addWidget(self.brush_settings_widget)
 
         eraser_button = QPushButton('Eraser')
+        eraser_button.setFixedHeight(30)
+        eraser_button.setFixedWidth(80)
         eraser_button.clicked.connect(self.show_eraser_settings)
         self.sidebar_layout.addWidget(eraser_button)
 
@@ -112,6 +116,10 @@ class MainWindow(QMainWindow):
 
     def save(self):
         print("Save action triggered!")
+
+    def toggle_tool_settings(self):
+        self.brush_button.setVisible(not self.brush_button.isVisible())
+        self.eraser_button.setVisible(not self.eraser_button.isVisible())
 
     def show_brush_settings(self):
         if self.brush_settings_widget.isHidden():

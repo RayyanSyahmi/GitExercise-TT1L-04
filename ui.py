@@ -18,6 +18,7 @@ class MainWindow(QMainWindow):
 
         self.sidebar = QWidget()
         self.sidebar.setFixedWidth(200)
+        self.sidebar.setStyleSheet("background-color: #f0f0f0;")
         self.sidebar_layout = QVBoxLayout()
         self.sidebar.setLayout(self.sidebar_layout)
         main_layout.addWidget(self.sidebar)
@@ -25,9 +26,13 @@ class MainWindow(QMainWindow):
         tool_label = QLabel("Tools")
         self.sidebar_layout.addWidget(tool_label)
 
+        buttons_layout = QHBoxLayout()
+
         brush_button = QPushButton('Brush')
+        brush_button.setToolTip('Select The Brush tool')
         brush_button.setFixedHeight(30)
         brush_button.setFixedWidth(80)
+        brush_button.setStyleSheet("background color: #4CAF50")
         brush_button.clicked.connect(self.show_brush_settings)
         self.sidebar_layout.addWidget(brush_button)
 
@@ -61,10 +66,13 @@ class MainWindow(QMainWindow):
         self.sidebar_layout.addWidget(self.brush_settings_widget)
 
         eraser_button = QPushButton('Eraser')
+        eraser_button.setToolTip('Select The Eraser Tool')
         eraser_button.setFixedHeight(30)
         eraser_button.setFixedWidth(80)
         eraser_button.clicked.connect(self.show_eraser_settings)
         self.sidebar_layout.addWidget(eraser_button)
+
+        self.sidebar_layout.addLayout(buttons_layout)
 
         self.eraser_settings_widget = QWidget()
         eraser_settings_layout = QVBoxLayout()
@@ -84,14 +92,12 @@ class MainWindow(QMainWindow):
         self.eraser_settings_widget.hide()
         self.sidebar_layout.addWidget(self.eraser_settings_widget)
 
-        
         main_layout.addStretch(1)
 
         menubar = self.menuBar()
 
         file_menu = menubar.addMenu('File')
         
-
         save_action = QAction('Save', self)
         save_action.setShortcut('Ctrl+S')
         save_action.triggered.connect(self.save)
@@ -141,6 +147,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyleSheet("QPushButton{ font-size: 14px; }")
     window = MainWindow()
     window.show()
     sys.exit(app.exec_())

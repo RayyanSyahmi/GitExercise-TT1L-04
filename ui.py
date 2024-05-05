@@ -5,6 +5,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        self.active_tool = None
         
     def initUI(self):
         self.setWindowTitle("Drawing app")
@@ -26,16 +27,14 @@ class MainWindow(QMainWindow):
         tool_label = QLabel("Tools")
         self.sidebar_layout.addWidget(tool_label)
 
-        buttons_layout = QHBoxLayout()
-
-        brush_button = QPushButton('Brush')
-        brush_button.setToolTip('Select The Brush tool')
-        brush_button.setFixedHeight(30)
-        brush_button.setFixedWidth(80)
-        brush_button.setStyleSheet("background color: #4CAF50")
-        brush_button.clicked.connect(self.show_brush_settings)
-        self.sidebar_layout.addWidget(brush_button)
-
+        self.brush_button = QPushButton('Brush')
+        self.brush_button.setToolTip('Select The Brush tool')
+        self.brush_button.setFixedHeight(30)
+        self.brush_button.setFixedWidth(80)
+        self.brush_button.clicked.connect(lambda: self.set_active_tool("Brush"))  
+        self.brush_button.clicked.connect(self.show_brush_settings)  
+        self.sidebar_layout.addWidget(self.brush_button)
+        
         self.brush_settings_widget = QWidget()
         brush_settings_layout = QVBoxLayout()
         self.brush_settings_widget.setLayout(brush_settings_layout)
@@ -65,14 +64,13 @@ class MainWindow(QMainWindow):
         self.brush_settings_widget.hide()
         self.sidebar_layout.addWidget(self.brush_settings_widget)
 
-        eraser_button = QPushButton('Eraser')
-        eraser_button.setToolTip('Select The Eraser Tool')
-        eraser_button.setFixedHeight(30)
-        eraser_button.setFixedWidth(80)
-        eraser_button.clicked.connect(self.show_eraser_settings)
-        self.sidebar_layout.addWidget(eraser_button)
-
-        self.sidebar_layout.addLayout(buttons_layout)
+        self.eraser_button = QPushButton('Eraser')
+        self.eraser_button.setToolTip('Select The Eraser Tool')
+        self.eraser_button.setFixedHeight(30)
+        self.eraser_button.setFixedWidth(80)
+        self. eraser_button.clicked.connect(self.show_eraser_settings)
+        self.sidebar_layout.addWidget(self.eraser_button)
+        self.eraser_button.clicked.connect(lambda: self.set_active_tool("Eraser"))
 
         self.eraser_settings_widget = QWidget()
         eraser_settings_layout = QVBoxLayout()
@@ -101,12 +99,15 @@ class MainWindow(QMainWindow):
         save_action = QAction('Save', self)
         save_action.setShortcut('Ctrl+S')
         save_action.triggered.connect(self.save)
+        file_menu.addAction(save_action)
 
         size_action = QAction('Size', self)
         size_action.triggered.connect(self.change_size)
+        file_menu.addAction(size_action)
 
         color_action = QAction('Color', self)
         color_action.triggered.connect(self.change_color)
+        file_menu.addAction(color_action)
 
         file_menu.addAction(save_action)
 
@@ -144,6 +145,21 @@ class MainWindow(QMainWindow):
     
     def update_thickness_label(self, value, label):
         label.setText(f"Thickness: {value}")
+
+    def set_active_tool(self, tool_name):
+        self.active_tool = tool_name
+
+        if tool_name == "Brush":
+            self.brush_button.setStyleSheet("background-color: #4CAF50; color: white;")
+            self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        elif tool_name == "Eraser":
+            self.eraser_button.setStyleSheet("background-color: #4CAF50; color: white;")
+            self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+
+
+            self.brush_button.setStyle(QApplication.style())
+            self.eraser_button.setStyle(QApplication.style())
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

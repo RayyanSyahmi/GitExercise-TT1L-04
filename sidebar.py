@@ -34,8 +34,8 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.valueChanged.connect(self.update_slider_label)
         brush_settings_layout.addWidget(size_slider)
 
-        self.brush = Brush()  # Create a Brush instance
-        self.brush_size_input = BrushSizeInput(self.brush)  # Create an instance of BrushSizeInput with a Brush instance
+        self.brush = Brush()
+        self.brush_size_input = BrushSizeInput(self.brush)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
 
         layout.addWidget(self.brush_settings_widget)

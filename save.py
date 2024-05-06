@@ -9,7 +9,7 @@ def save_file():
 
     file_path = QFileDialog.asksavesfilename(title = "Custom Save Title",
                                              filetypes= types, initialdir=".")
-    data = entry.get() # type: ignore
+    data = entry.get()
 
     if file_path != "":
         file_writter = open(file_path, mode = 'W')

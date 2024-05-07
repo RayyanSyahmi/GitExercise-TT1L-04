@@ -7,8 +7,9 @@ from brushes import BrushSizeInput, Brush
 import sys
 
 class Sidebar(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, canvas):
         super().__init__()
+        self.canvas = canvas
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -23,7 +24,7 @@ class Sidebar(QtWidgets.QWidget):
         layout.addWidget(self.brush_size_label)
 
         self.brush_settings_widget = QtWidgets.QWidget()
-        brush_settings_layout = QtWidgets.QHBoxLayout()
+        brush_settings_layout = QtWidgets.QVBoxLayout()
         brush_settings_layout.setSpacing(0)
         self.brush_settings_widget.setLayout(brush_settings_layout)
 
@@ -34,16 +35,22 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.valueChanged.connect(self.update_slider_label)
         brush_settings_layout.addWidget(size_slider)
 
-        self.brush = Brush()  # Create a Brush instance
-        self.brush_size_input = BrushSizeInput(self.brush)  # Create an instance of BrushSizeInput with a Brush instance
+        self.color_button = QtWidgets.QPushButton("Choose color", self)
+        self.color_button.clicked.connect(self.open_color_dialog)
+        brush_settings_layout.addWidget(self.color_button)
+
+        self.brush = Brush()
+        self.brush_size_input = BrushSizeInput(self.brush, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
-
+        
         layout.addWidget(self.brush_settings_widget)
-
         layout.addStretch(1)
 
     def update_slider_label(self, value):
         self.brush_size_label.setText("Size: {}".format(value))
-        
-    
 
+    def open_color_dialog(self):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            self.brush.color = color
+            self.brush.set_color(color)

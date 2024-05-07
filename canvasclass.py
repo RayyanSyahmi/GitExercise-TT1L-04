@@ -5,25 +5,20 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from brushes import Brush, BrushSizeInput
+from sidebar import Sidebar
 
-class Canvas(QGraphicsView):
+class Canvas(QtWidgets.QLabel):
     def __init__(self):
         super().__init__()
-        self.pixmap = QPixmap(1080, 720)
-        self.pixmap.fill(Qt.white)
-        self.scene = QGraphicsScene()
-        self.scene.addPixmap(self.pixmap)
-        self.setScene(self.scene)
-        self.setFixedSize(1080, 720)
-        self.last_pos = None
-        self.brush = Brush(Qt.black, 5)
-        
-    def update_brush_size(self, text):
-        try:
-            self.brush.size = int(text)
-            self.brush.set_size(self.brush.size)
-        except ValueError:
-            pass
+
+        self.setPixmap(QtGui.QPixmap(1080, 720))
+        pixmap = QtGui.QPixmap(1080, 720)
+        pixmap.fill(QtCore.Qt.white)
+        painter = QtGui.QPainter(pixmap)
+        painter.end()
+        self.setPixmap(pixmap)
+        self.update()
+        self.brush = Brush()
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -36,9 +31,9 @@ class Canvas(QGraphicsView):
             painter.setPen(pen)
             painter.drawLine(self.last_pos, event.pos())
             painter.end()
-            self.update()  
+            self.update()
+            self.last_pos = event.pos()
 
-    def eventFilter(self, obj, event):
-        if obj == self and event.type() == QEvent.MouseMove:
-            print("Mouse move event received")
-        return super().eventFilter(obj, event)
+    def update_brush_size(self, new_size):
+        self.brush_size_input.update_brush_size(new_size)
+

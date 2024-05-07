@@ -35,12 +35,8 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.valueChanged.connect(self.update_slider_label)
         brush_settings_layout.addWidget(size_slider)
 
-        self.color_button = QtWidgets.QPushButton("Choose color", self)
-        self.color_button.clicked.connect(self.open_color_dialog)
-        brush_settings_layout.addWidget(self.color_button)
-
-        self.brush = Brush()
-        self.brush_size_input = BrushSizeInput(self.brush)
+        self.brush = Brush()  # Create a Brush instance
+        self.brush_size_input = BrushSizeInput(self.brush)  # Create an instance of BrushSizeInput with a Brush instance
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
                 
         layout.addWidget(self.brush_settings_widget)

@@ -4,12 +4,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from brushes import BrushSizeInput, Brush
-from canvasclass import Canvas
 import sys
 
 class Sidebar(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, canvas):
         super().__init__()
+        self.canvas = canvas
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -40,11 +40,10 @@ class Sidebar(QtWidgets.QWidget):
         brush_settings_layout.addWidget(self.color_button)
 
         self.brush = Brush()
-        self.brush_size_input = BrushSizeInput(self.brush)
+        self.brush_size_input = BrushSizeInput(self.brush, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
-
+        
         layout.addWidget(self.brush_settings_widget)
-
         layout.addStretch(1)
 
     def update_slider_label(self, value):

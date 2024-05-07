@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from brushes import Brush, BrushSizeInput
+from sidebar import Sidebar
 
 class Canvas(QtWidgets.QLabel):
     def __init__(self):
@@ -17,10 +18,7 @@ class Canvas(QtWidgets.QLabel):
         painter.end()
         self.setPixmap(pixmap)
         self.update()
-
         self.brush = Brush()
-        self.brush_size_input = BrushSizeInput(self.brush)
-
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:

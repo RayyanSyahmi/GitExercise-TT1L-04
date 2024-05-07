@@ -12,9 +12,6 @@ from canvasclass import Canvas
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Paint app")
-        self.setGeometry(0, 0, 1280, 720)
-
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
@@ -24,22 +21,20 @@ class MainWindow(QMainWindow):
         self.main_h_layout = QHBoxLayout()
         self.vbox_layout.addLayout(self.main_h_layout)
 
-        self.sidebar = Sidebar()
-        self.main_h_layout.addWidget(self.sidebar)
-
-        self.brush = Brush()
         self.canvas = Canvas()
-        self.canvas.brush = self.brush
+        self.sidebar = Sidebar(self.canvas)
+        self.main_h_layout.addWidget(self.sidebar)
         self.main_h_layout.addWidget(self.canvas)
 
         self.menu_bar = MyMenuBar()
         self.setMenuBar(self.menu_bar)
-
+        
+        self.move(0, 0)
         self.show()
-    
-app = QApplication(sys.argv)
 
+app = QApplication(sys.argv)
+app.setFont(QFont("Segoe UI", 9))
+app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
 main_window = MainWindow()
 main_window.show()
-
 sys.exit(app.exec_())

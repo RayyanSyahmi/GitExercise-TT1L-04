@@ -25,10 +25,8 @@ class BrushSizeInput(QtWidgets.QWidget):
 
     @pyqtSlot(int)
     def update_brush_size(self, new_size):
-        print(f"Brush size updated to: {new_size}")  # Add this print statement
         self.brush_size_input.setText(str(new_size))
         self.brush.set_size(new_size)
-        print(f"Brush size: {self.brush.size}")  # Add this print statement
 
     def set_brush_radius_from_input(self):
         try:

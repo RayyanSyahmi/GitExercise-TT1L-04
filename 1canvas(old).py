@@ -40,19 +40,13 @@ class PaintCanvas(QtWidgets.QLabel):
             self.last_pos = event.pos()
 
     def mouseMoveEvent(self, event):
-        #checks if mouse if pressed and checks last  positionf
         if event.buttons() & QtCore.Qt.LeftButton and self.last_pos:
-            #creates QPainter object and sets pixmap as the paint device
             painter = QtGui.QPainter(self.pixmap())
-            #creates QPen with size and color from brush class
             pen = QtGui.QPen(QtGui.QPen(self.brush.color, self.brush.size))
-            #sets properties of Qpainter to Qpen
             painter.setPen(pen)
-            #draws line between last position and current position
             painter.drawLine(self.last_pos, event.pos())
             painter.end()
             self.update()
-            #keep track of mouse movement
             self.last_pos = event.pos()
 
 app = QtWidgets.QApplication(sys.argv)

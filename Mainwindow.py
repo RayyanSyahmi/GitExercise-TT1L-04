@@ -12,7 +12,6 @@ from canvasclass import Canvas
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        print("MainWindow initialized")
         self.setWindowTitle("Paint app")
         self.setGeometry(0, 0, 1280, 720)
 
@@ -38,8 +37,6 @@ class MainWindow(QMainWindow):
 
         self.show()
         
-        print("MainWindow initialized complete")
-
 app = QApplication(sys.argv)
 
 main_window = MainWindow()

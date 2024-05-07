@@ -24,7 +24,7 @@ class Sidebar(QtWidgets.QWidget):
         layout.addWidget(self.brush_size_label)
 
         self.brush_settings_widget = QtWidgets.QWidget()
-        brush_settings_layout = QtWidgets.QHBoxLayout()
+        brush_settings_layout = QtWidgets.QVBoxLayout()
         brush_settings_layout.setSpacing(0)
         self.brush_settings_widget.setLayout(brush_settings_layout)
 
@@ -34,6 +34,10 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.setValue(5)
         size_slider.valueChanged.connect(self.update_slider_label)
         brush_settings_layout.addWidget(size_slider)
+
+        self.color_button = QtWidgets.QPushButton("Choose color", self)
+        self.color_button.clicked.connect(self.open_color_dialog)
+        brush_settings_layout.addWidget(self.color_button)
 
         self.brush = Brush()
         self.brush_size_input = BrushSizeInput(self.brush)
@@ -45,6 +49,14 @@ class Sidebar(QtWidgets.QWidget):
 
     def update_slider_label(self, value):
         self.brush_size_label.setText("Size: {}".format(value))
-        
-    
 
+    def open_color_dialog(self):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            self.brush.color = color
+            self.brush.set_color(color)
+            
+    def choose_color(self):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            self.brush.color = color

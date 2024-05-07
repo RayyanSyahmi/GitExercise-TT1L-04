@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.setMenuBar(self.menu_bar)
 
         self.show()
-        
+    
 app = QApplication(sys.argv)
 
 main_window = MainWindow()

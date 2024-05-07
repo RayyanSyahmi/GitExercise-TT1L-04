@@ -10,9 +10,11 @@ class Brush:
         self.size = size
         self.color = color
 
+    def set_color(self, color):
+        self.color = color
+
     def set_size(self, size):
         self.size = size
-        self.brush_radius = size
 
 class BrushSizeInput(QtWidgets.QWidget):
     def __init__(self, brush, parent=None):
@@ -28,6 +30,11 @@ class BrushSizeInput(QtWidgets.QWidget):
         self.brush_size_input.setText(str(new_size))
         self.brush.set_size(new_size)
 
+    def choose_color(self):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            self.brush.color = color
+
     def set_brush_radius_from_input(self):
         try:
             self.brush.size = int(self.brush_size_input.text())
@@ -35,4 +42,6 @@ class BrushSizeInput(QtWidgets.QWidget):
             self.brush_size_input.clear()
         except ValueError:
             pass
+        self.brush.color = self.sidebar.brush.color
+    
 

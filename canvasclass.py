@@ -4,8 +4,8 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from brushes import Brush, BrushSizeInput
-from sidebar import Sidebar
+from brush import Brush
+
 
 class Canvas(QtWidgets.QLabel):
     def __init__(self):

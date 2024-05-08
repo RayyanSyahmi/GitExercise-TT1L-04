@@ -37,7 +37,7 @@ class PaintCanvas(QtWidgets.QLabel):
         self.brush_size_input.setGeometry(10, 10, 80, 20)
 
         self.color_button = QtWidgets.QPushButton("Choose color", self)
-        self.color_button.setGeometry(self.brush_size_input.geometry().left() + 10, self.brush_size_input.geometry().top(), 20, 20)
+        self.color_button.setGeometry(self.brush_size_input.geometry().right() + 10, self.brush_size_input.geometry().top(), 20, 20)
         self.color_button.clicked.connect(self.choose_color)
 
         layout = QtWidgets.QHBoxLayout()

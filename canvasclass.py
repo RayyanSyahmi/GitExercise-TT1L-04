@@ -12,12 +12,6 @@ class Line:
         self.point2 = point2
         self.brush_size = brush_size
 
-class Line:
-    def __init__(self, point1, point2, brush_size):
-        self.point1 = point1
-        self.point2 = point2
-        self.brush_size = brush_size
-
 class Canvas(QtWidgets.QLabel):
     def __init__(self):
         super().__init__()
@@ -54,7 +48,7 @@ class Canvas(QtWidgets.QLabel):
             self.drawing_points.append(event.pos())
 
     def update_brush_size(self, new_size):
-        self.brush_size_input.update_brush_size(new_size)
+        self.brush.size = new_size
 
     def paintEvent(self, event):
         painter = QPainter(self)

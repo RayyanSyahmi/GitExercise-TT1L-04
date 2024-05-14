@@ -40,24 +40,21 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.setValue(20)
         size_slider.valueChanged.connect(self.update_slider_label)
         
-        self.color_button = QtWidgets.QPushButton("Choose color", self)
-        self.color_button.clicked.connect(self.open_color_dialog)
 
         layout.addWidget(self.brush_button)  
         layout.addWidget(self.eraser_button)
         layout.addWidget(self.brush_size_label)
         layout.addWidget(size_slider)
-        layout.addWidget(self.color_button)
+        layout.addWidget(QtWidgets.QPushButton("Choose color", self))
 
-        layout.setAlignment(self.brush_button, Qt.AlignTop)
-        layout.setAlignment(self.eraser_button, Qt.AlignTop)
+        layout.setAlignment(Qt.AlignTop)
 
         self.canvas = canvas
         self.brush = Brush()
         self.eraser = Eraser()
         self.brush_size_input = BrushInput(self.brush, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
-        
+
     def update_slider_label(self, value):
         self.brush_size_label.setText("Size: {}".format(value))
 

@@ -9,6 +9,7 @@ class Brush:
     def __init__(self, size=2, color=Qt.black):
         self.size = size
         self.color = color
+        self.shape = "circle"
 
     def set_color(self, color):
         self.color = color
@@ -16,6 +17,10 @@ class Brush:
     def set_size(self, size):
         self.size = size
 
+class Eraser():
+    def __init__(self, eraser_size=20, eraser_color=Qt.white):
+        self.eraser_size = eraser_size
+        self.eraser_color = eraser_color
 
 class BrushInput(QtWidgets.QWidget):
     def __init__(self, brush, canvas):
@@ -36,6 +41,7 @@ class BrushInput(QtWidgets.QWidget):
         self.brush_size_input.setText(str(new_size))
         self.brush.set_size(new_size)
         self.canvas.brush.size = new_size
+        self.canvas.brush.shape = "circle"
         
     def set_brush_radius_from_input(self):
         try:

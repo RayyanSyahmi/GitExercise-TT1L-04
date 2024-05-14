@@ -4,8 +4,19 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from brush import Brush
+from brush import Brush, Eraser
 
+class Line:
+    def __init__(self, point1, point2, brush_size):
+        self.point1 = point1
+        self.point2 = point2
+        self.brush_size = brush_size
+
+class Line:
+    def __init__(self, point1, point2, brush_size):
+        self.point1 = point1
+        self.point2 = point2
+        self.brush_size = brush_size
 
 class Canvas(QtWidgets.QLabel):
     def __init__(self):
@@ -19,10 +30,17 @@ class Canvas(QtWidgets.QLabel):
         self.setPixmap(pixmap)
         self.update()
         self.brush = Brush()
+        self.eraser = Eraser()
+        self.current_tool = None
+        self.drawing_points = []  # Create a list to store the drawing points
+    
+    def set_tool(self, tool):
+        self.current_tool = tool
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             self.last_pos = event.pos()
+            self.drawing_points.append(event.pos())  # Add the point to the list
 
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.LeftButton and self.last_pos:
@@ -33,7 +51,17 @@ class Canvas(QtWidgets.QLabel):
             painter.end()
             self.update()
             self.last_pos = event.pos()
+            self.drawing_points.append(event.pos())  # Add the point to the list
 
     def update_brush_size(self, new_size):
         self.brush_size_input.update_brush_size(new_size)
 
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        brush = QBrush(self.brush.color)
+        painter.setBrush(brush)
+
+        for point in self.drawing_points:
+            painter.drawEllipse(QRectF(point.x() - self.brush.size / 2, point.y() - self.brush.size / 2, self.brush.size, self.brush.size))

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 import sys
 
 class Brush:
-    def __init__(self, size=2, color=Qt.black):
+    def __init__(self, size=20, color=Qt.black):
         self.size = size
         self.color = color
         self.shape = "circle"

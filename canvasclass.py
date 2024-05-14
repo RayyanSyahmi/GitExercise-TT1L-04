@@ -60,11 +60,17 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
+        pen = QPen(self.brush.color)
+        pen.setWidth(0) 
+        painter.setPen(pen)
+
         brush = QBrush(self.brush.color)
         painter.setBrush(brush)
 
-        pen = QPen(self.brush.color)
-        painter.setPen(pen)
-
         for point in self.drawing_points:
+            gradient = QRadialGradient(point, self.brush.size / 2)
+            gradient.setColorAt(0, self.brush.color)
+            gradient.setColorAt(1, Qt.transparent)
+            brush = QBrush(gradient)
+            painter.setBrush(brush)
             painter.drawEllipse(QRectF(point.x() - self.brush.size / 2, point.y() - self.brush.size / 2, self.brush.size, self.brush.size))

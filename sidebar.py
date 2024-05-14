@@ -32,12 +32,12 @@ class Sidebar(QtWidgets.QWidget):
         self.eraser_button.setFixedWidth(80)
         self.eraser_button.clicked.connect(self.set_eraser_tool)
         
-        self.brush_size_label = QtWidgets.QLabel("Size: 5")
+        self.brush_size_label = QtWidgets.QLabel("Size: 20")
 
         size_slider = QtWidgets.QSlider(Qt.Horizontal)
         size_slider.setMinimum(1)
         size_slider.setMaximum(100)
-        size_slider.setValue(5)
+        size_slider.setValue(20)
         size_slider.valueChanged.connect(self.update_slider_label)
         
         self.color_button = QtWidgets.QPushButton("Choose color", self)

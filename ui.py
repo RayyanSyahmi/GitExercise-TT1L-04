@@ -1,7 +1,8 @@
 import sys
+import os
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QInputDialog, QAction, QColorDialog, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider, QStackedWidget
-from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider, QStackedWidget
+from PyQt5.QtGui import QFont, QIcon
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -17,7 +18,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(10,10,10,10)
+        main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
         central_widget.setLayout(main_layout)
 
@@ -28,20 +29,33 @@ class MainWindow(QMainWindow):
         self.sidebar_layout.addWidget(tool_label)
         self.sidebar_layout.addStretch(1)
         
-        self.brush_button = QPushButton('Brush')  
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
+        brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
+        erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
+        undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
+        redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
+
+        print(f"Brush icon path: {brushicon}, Exists: {os.path.exists(brushicon)}")
+        print(f"Eraser icon path: {erasericon}, Exists: {os.path.exists(erasericon)}")
+        print(f"Undo icon path: {undoicon}, Exists: {os.path.exists(undoicon)}")
+        print(f"Redo icon path: {redoicon}, Exists: {os.path.exists(redoicon)}")
+
+        self.brush_button = QPushButton('')
         self.brush_button.setToolTip('Select The Brush tool')
         self.brush_button.setFixedHeight(30)
         self.brush_button.setFixedWidth(80)
-        self.brush_button.clicked.connect(lambda: self.set_active_tool("Brush"))  
+        self.brush_button.setIcon(QIcon(brushicon))  
+        self.brush_button.clicked.connect(lambda: self.set_active_tool("Brush"))
 
-        self.eraser_button = QPushButton('Eraser')
-        self.eraser_button.setToolTip('Select The Eraser Tool')  # Adding tooltip here
+        self.eraser_button = QPushButton('')
+        self.eraser_button.setToolTip('Select The Eraser Tool')
         self.eraser_button.setFixedHeight(30)
         self.eraser_button.setFixedWidth(80)
+        self.eraser_button.setIcon(QIcon(erasericon))  
         self.eraser_button.clicked.connect(lambda: self.set_active_tool("Eraser"))
 
-
-        self.sidebar_layout.addWidget(self.brush_button)  
+        self.sidebar_layout.addWidget(self.brush_button)
         self.sidebar_layout.addWidget(self.eraser_button)
         self.sidebar_layout.setAlignment(self.brush_button, Qt.AlignTop)
         self.sidebar_layout.setAlignment(self.eraser_button, Qt.AlignTop)
@@ -49,7 +63,6 @@ class MainWindow(QMainWindow):
         self.stacked_widget = QStackedWidget()
         self.sidebar_layout.addWidget(self.stacked_widget)
 
-        
         brush_settings_widget = QWidget()
         brush_settings_layout = QVBoxLayout()
         brush_settings_widget.setLayout(brush_settings_layout)
@@ -68,7 +81,7 @@ class MainWindow(QMainWindow):
         self.brush_size_label = QLabel("Size: 5")
         brush_settings_layout.addWidget(self.brush_size_label)
 
-        size_slider = QSlider()   
+        size_slider = QSlider()
         size_slider.setOrientation(Qt.Horizontal)
         size_slider.setMinimum(1)
         size_slider.setMaximum(100)
@@ -78,7 +91,6 @@ class MainWindow(QMainWindow):
 
         self.stacked_widget.addWidget(brush_settings_widget)
 
-        
         eraser_settings_widget = QWidget()
         eraser_settings_layout = QVBoxLayout()
         eraser_settings_widget.setLayout(eraser_settings_layout)
@@ -108,19 +120,14 @@ class MainWindow(QMainWindow):
         save_action.triggered.connect(self.save)
         file_menu.addAction(save_action)
 
+        undo_action = QAction(QIcon(undoicon), 'Undo', self)
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+
+        menubar.addAction(undo_action)
+        menubar.addAction(redo_action)
        
         brush_settings_widget.hide()
         eraser_settings_widget.hide()
-
-    def change_size(self):
-        size, ok = QInputDialog.getInt(self, "Change Brush Size", "Brush size:", 5, 1, 50)
-        if ok:
-            print(f"Brush size changed to: {size}")
-
-    def change_color(self):
-        color = QColorDialog.getColor(self)
-        if color.isValid():
-            print(f"Brush color changed to: {color.name()}")      
 
     def save(self):
         print("Save action triggered!")
@@ -159,9 +166,8 @@ class MainWindow(QMainWindow):
             self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
             self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         else:
-            self.brush_button.setStyle(QApplication.style())
-            self.eraser_button.setStyle(QApplication.style())
-
+            self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+            self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         tool_label = QLabel("Tools")
         self.sidebar_layout.addWidget(tool_label)
         self.sidebar_layout.addStretch(1)
-        
+
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
         brushicon = os.path.join(script_dir, 'icons', 'brush.png')
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
 
         menubar = self.menuBar()
         file_menu = menubar.addMenu('File')
-        
+
         save_action = QAction('Save', self)
         save_action.setShortcut('Ctrl+S')
         save_action.triggered.connect(self.save)
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
 
         menubar.addAction(undo_action)
         menubar.addAction(redo_action)
-       
+
         brush_settings_widget.hide()
         eraser_settings_widget.hide()
 
@@ -138,7 +138,7 @@ class MainWindow(QMainWindow):
 
     def update_slider_label(self, value, label):
         label.setText(f"Size: {value}")
-    
+
     def update_thickness_label(self, value, label):
         label.setText(f"Thickness: {value}")
 

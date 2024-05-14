@@ -32,7 +32,7 @@ class Canvas(QtWidgets.QLabel):
         self.brush = Brush()
         self.eraser = Eraser()
         self.current_tool = None
-        self.drawing_points = []  # Create a list to store the drawing points
+        self.drawing_points = []
     
     def set_tool(self, tool):
         self.current_tool = tool
@@ -40,7 +40,7 @@ class Canvas(QtWidgets.QLabel):
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
             self.last_pos = event.pos()
-            self.drawing_points.append(event.pos())  # Add the point to the list
+            self.drawing_points.append(event.pos())
 
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.LeftButton and self.last_pos:
@@ -60,8 +60,8 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        pen = QPen(self.brush.color)
-        pen.setWidth(0) 
+        pen = QPen(Qt.transparent)  
+        pen.setJoinStyle(Qt.RoundJoin)  
         painter.setPen(pen)
 
         brush = QBrush(self.brush.color)

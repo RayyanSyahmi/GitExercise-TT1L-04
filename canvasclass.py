@@ -51,7 +51,7 @@ class Canvas(QtWidgets.QLabel):
             painter.end()
             self.update()
             self.last_pos = event.pos()
-            self.drawing_points.append(event.pos())  # Add the point to the list
+            self.drawing_points.append(event.pos())
 
     def update_brush_size(self, new_size):
         self.brush_size_input.update_brush_size(new_size)
@@ -62,6 +62,9 @@ class Canvas(QtWidgets.QLabel):
 
         brush = QBrush(self.brush.color)
         painter.setBrush(brush)
+
+        pen = QPen(self.brush.color)
+        painter.setPen(pen)
 
         for point in self.drawing_points:
             painter.drawEllipse(QRectF(point.x() - self.brush.size / 2, point.y() - self.brush.size / 2, self.brush.size, self.brush.size))

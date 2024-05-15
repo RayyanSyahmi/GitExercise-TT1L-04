@@ -3,13 +3,13 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from brush import BrushInput, Brush
+from brush import BrushInput, Brush, Eraser
 import sys
 
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         super().__init__()
-        self.canvas = canvas
+
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -17,34 +17,43 @@ class Sidebar(QtWidgets.QWidget):
         self.setPalette(palette)
 
         layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(5)
+        layout.setSpacing(0)
         self.setLayout(layout)
 
-        self.brush_size_label = QtWidgets.QLabel("Size: 5")
-        layout.addWidget(self.brush_size_label)
+        self.brush_button = QPushButton('Brush')  
+        self.brush_button.setToolTip('Select The Brush tool')
+        self.brush_button.setFixedHeight(30)
+        self.brush_button.setFixedWidth(80)
+        self.brush_button.clicked.connect(self.set_brush_tool)
 
-        self.brush_settings_widget = QtWidgets.QWidget()
-        brush_settings_layout = QtWidgets.QVBoxLayout()
-        brush_settings_layout.setSpacing(0)
-        self.brush_settings_widget.setLayout(brush_settings_layout)
+        self.eraser_button = QPushButton('Eraser')
+        self.eraser_button.setToolTip('Select The Eraser Tool')  # Adding tooltip here
+        self.eraser_button.setFixedHeight(30)
+        self.eraser_button.setFixedWidth(80)
+        self.eraser_button.clicked.connect(self.set_eraser_tool)
+        
+        self.brush_size_label = QtWidgets.QLabel("Size: 20")
 
         size_slider = QtWidgets.QSlider(Qt.Horizontal)
         size_slider.setMinimum(1)
         size_slider.setMaximum(100)
-        size_slider.setValue(5)
+        size_slider.setValue(20)
         size_slider.valueChanged.connect(self.update_slider_label)
-        brush_settings_layout.addWidget(size_slider)
+        
 
-        self.color_button = QtWidgets.QPushButton("Choose color", self)
-        self.color_button.clicked.connect(self.open_color_dialog)
-        brush_settings_layout.addWidget(self.color_button)
+        layout.addWidget(self.brush_button)  
+        layout.addWidget(self.eraser_button)
+        layout.addWidget(self.brush_size_label)
+        layout.addWidget(size_slider)
+        layout.addWidget(QtWidgets.QPushButton("Choose color", self))
 
+        layout.setAlignment(Qt.AlignTop)
+
+        self.canvas = canvas
         self.brush = Brush()
+        self.eraser = Eraser()
         self.brush_size_input = BrushInput(self.brush, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
-        
-        layout.addWidget(self.brush_settings_widget)
-        layout.addStretch(1)
 
     def update_slider_label(self, value):
         self.brush_size_label.setText("Size: {}".format(value))
@@ -54,3 +63,15 @@ class Sidebar(QtWidgets.QWidget):
         if color.isValid():
             self.brush.color = color
             self.brush.set_color(color)
+
+    def set_brush_tool(self):
+        self.active_tool = "Brush"
+        self.brush_button.setStyleSheet("background-color: #2196F3; color: white;")
+        self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.canvas.set_tool(self.brush)
+
+    def set_eraser_tool(self):
+        self.active_tool = "Eraser"
+        self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
+        self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.canvas.set_tool(self.eraser)

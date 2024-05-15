@@ -18,14 +18,19 @@ class MyMenuBar(QtWidgets.QMenuBar):
         self.save_action.triggered.connect(self.save_file)
         file_menu.addAction("Exit")
 
-    def save_file():
-        types = [ ("Image Files", "*.png"),
-                ("All Files", "*.*")]
+    def save_file(self):
+        types = [("Text Files", "*.txt"),
+                 ("All Files", "*.*"),
+                 ("Png Files", "*.png"),
+                 ("Jpeg Files", "*.jpg *.jpeg")]
 
-        file_path = QFileDialog.getSaveFileName(title = "Custom Save Title",
-                                            filter = ";;".join(f"{name} ({pattern})" for name, pattern in types),
-                                            initialdir=".")
+        file_path, _ = QFileDialog.getSaveFileName(self,
+                                                    "Drawing app saving",
+                                                    "",
+                                                    "Text Files (*.txt);;Png Files (*.png);;Jpeg Files (*.jpg *.jpeg)",
+                                                    options=QFileDialog.DontUseNativeDialog)
 
-        if file_path != "":
-            pixmap = self.canvas.grab()
-            pixmap.save(file_path)
+        if file_path:
+            data = self.entry.text()
+            with open(file_path, mode='w') as file_writter:
+                file_writter.write(data)

@@ -31,20 +31,24 @@ class MainWindow(QMainWindow):
         
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
-        brushicon = os.path.join(script_dir, 'icons', 'brush.png')
-        erasericon = os.path.join(script_dir, 'icons', 'eraser.png')
+        brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
+        erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
+        undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
+        redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
 
         print(f"Brush icon path: {brushicon}, Exists: {os.path.exists(brushicon)}")
         print(f"Eraser icon path: {erasericon}, Exists: {os.path.exists(erasericon)}")
+        print(f"Undo icon path: {undoicon}, Exists: {os.path.exists(undoicon)}")
+        print(f"Redo icon path: {redoicon}, Exists: {os.path.exists(redoicon)}")
 
-        self.brush_button = QPushButton('Brush')
+        self.brush_button = QPushButton('')
         self.brush_button.setToolTip('Select The Brush tool')
         self.brush_button.setFixedHeight(30)
         self.brush_button.setFixedWidth(80)
         self.brush_button.setIcon(QIcon(brushicon))  
         self.brush_button.clicked.connect(lambda: self.set_active_tool("Brush"))
 
-        self.eraser_button = QPushButton('Eraser')
+        self.eraser_button = QPushButton('')
         self.eraser_button.setToolTip('Select The Eraser Tool')
         self.eraser_button.setFixedHeight(30)
         self.eraser_button.setFixedWidth(80)
@@ -116,8 +120,8 @@ class MainWindow(QMainWindow):
         save_action.triggered.connect(self.save)
         file_menu.addAction(save_action)
 
-        undo_action = QAction(QIcon('icons/undo.png'), 'Undo', self)
-        redo_action = QAction(QIcon('icons/redo.png'), 'Redo', self)
+        undo_action = QAction(QIcon(undoicon), 'Undo', self)
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
 
         menubar.addAction(undo_action)
         menubar.addAction(redo_action)
@@ -162,8 +166,8 @@ class MainWindow(QMainWindow):
             self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
             self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         else:
-            self.brush_button.setStyle(QApplication.style())
-            self.eraser_button.setStyle(QApplication.style())
+            self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+            self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

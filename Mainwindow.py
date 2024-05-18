@@ -25,7 +25,8 @@ class MainWindow(QMainWindow):
         self.main_h_layout.addWidget(self.sidebar)
         self.main_h_layout.addWidget(self.canvas)
 
-        self.menu_bar = MyMenuBar()
+
+        self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
         
         self.move(0, 0)

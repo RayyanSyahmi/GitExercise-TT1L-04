@@ -27,6 +27,7 @@ class Canvas(QtWidgets.QLabel):
         self.eraser = Eraser()
         self.current_tool = None
         self.drawing_points = []
+        self.setStyleSheet("background-color: white;")
     
     def set_tool(self, tool):
         self.current_tool = tool

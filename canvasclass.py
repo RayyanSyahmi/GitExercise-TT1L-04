@@ -69,3 +69,7 @@ class Canvas(QtWidgets.QLabel):
             brush = QBrush(gradient)
             painter.setBrush(brush)
             painter.drawEllipse(QRectF(point.x() - self.brush.size / 2, point.y() - self.brush.size / 2, self.brush.size, self.brush.size))
+
+    def save(self, filePath):
+        pixmap = self.pixmap()
+        pixmap.save(filePath) 

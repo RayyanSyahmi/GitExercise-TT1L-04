@@ -16,8 +16,8 @@ class MyMenuBar(QtWidgets.QMenuBar):
         file_menu.addAction("Open")
 
         saveAction = QAction("Save", self)
-        self.save_action = file_menu.addAction("Save")
         saveAction.triggered.connect(self.save)
+        self.save_action = file_menu.addAction(saveAction)
 
     def save(self):
         print("Save button pressed")

@@ -9,6 +9,7 @@ class LayeredCanvas(QWidget):
         super().__init__()
 
         self.layers = []
+        self.layer_opacities = []
         self.current_layer_index = 0
         self.brush_size = 5
         self.brush_color = Qt.black
@@ -19,7 +20,7 @@ class LayeredCanvas(QWidget):
 
     def init_ui(self):
         self.setWindowTitle('Layered Canvas')
-        self.setGeometry(100, 100, 400, 400)
+        self.setGeometry(100, 100, 1000, 800)
 
         self.add_layer_button = QPushButton('Add Layer')
         self.add_layer_button.clicked.connect(self.add_layer)
@@ -33,6 +34,7 @@ class LayeredCanvas(QWidget):
         self.layer_combo_box = QComboBox()
         self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
 
+        self.brush_size_label = QLabel('Brush Size:')
         self.brush_size_slider = QSlider(Qt.Horizontal)
         self.brush_size_slider.setMinimum(1)
         self.brush_size_slider.setMaximum(50)
@@ -52,18 +54,26 @@ class LayeredCanvas(QWidget):
         self.shape_combo_box.addItem('Star')
         self.shape_combo_box.currentIndexChanged.connect(self.change_shape)
 
+        self.shape_size_label = QLabel('Shape Size:')
         self.shape_size_slider = QSlider(Qt.Horizontal)
         self.shape_size_slider.setMinimum(1)
         self.shape_size_slider.setMaximum(50)
         self.shape_size_slider.setValue(self.shape_size)
         self.shape_size_slider.valueChanged.connect(self.change_shape_size)
 
+        self.opacity_label = QLabel('Layer Opacity:')
+        self.opacity_slider = QSlider(Qt.Horizontal)
+        self.opacity_slider.setMinimum(0)
+        self.opacity_slider.setMaximum(100)
+        self.opacity_slider.setValue(100)
+        self.opacity_slider.valueChanged.connect(self.change_layer_opacity)
+
         self.canvas_label = QLabel()
-        self.canvas_label.setFixedSize(400, 400)
+        self.canvas_label.setFixedSize(1000, 800)
         self.canvas_label.setAlignment(Qt.AlignCenter)
         self.canvas_label.setStyleSheet("border: 2px solid black;")
 
-        self.canvas_pixmap = QPixmap(400, 400)
+        self.canvas_pixmap = QPixmap(1000, 800)
         self.canvas_pixmap.fill(Qt.white)
         self.canvas_label.setPixmap(self.canvas_pixmap)
 
@@ -76,10 +86,18 @@ class LayeredCanvas(QWidget):
         self.main_layout.addWidget(self.remove_layer_button)
         self.main_layout.addWidget(self.clear_layer_button)
         self.main_layout.addWidget(self.layer_combo_box)
+        
+        self.main_layout.addWidget(self.brush_size_label)
         self.main_layout.addWidget(self.brush_size_slider)
         self.main_layout.addWidget(self.brush_color_button)
         self.main_layout.addWidget(self.shape_combo_box)
+        
+        self.main_layout.addWidget(self.shape_size_label)
         self.main_layout.addWidget(self.shape_size_slider)
+        
+        self.main_layout.addWidget(self.opacity_label)
+        self.main_layout.addWidget(self.opacity_slider)
+        
         self.main_layout.addWidget(self.scroll_area)
 
         self.setLayout(self.main_layout)
@@ -90,16 +108,18 @@ class LayeredCanvas(QWidget):
 
     def add_layer(self):
         layer_index = len(self.layers)
-        layer = QImage(400, 400, QImage.Format_ARGB32)
+        layer = QImage(1000, 800, QImage.Format_ARGB32)
         layer.fill(Qt.transparent)
         self.layers.append(layer)
-        
+        self.layer_opacities.append(1.0)  # Default opacity to 100%
+
         self.layer_combo_box.addItem(f"Layer {layer_index + 1}")
         self.layer_combo_box.setCurrentIndex(layer_index)
 
     def remove_layer(self):
         if len(self.layers) > 1:
             self.layers.pop()
+            self.layer_opacities.pop()
             self.layer_combo_box.removeItem(len(self.layers))
             self.current_layer_index = min(self.current_layer_index, len(self.layers) - 1)
             self.update_canvas()
@@ -110,8 +130,11 @@ class LayeredCanvas(QWidget):
             self.update_canvas()
 
     def change_current_layer(self, index):
-        self.current_layer_index = index
-        self.update_canvas()
+        if index < len(self.layer_opacities):
+            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
+            self.current_layer_index = index
+            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.update_canvas()
 
     def change_brush_size(self, size):
         self.brush_size = size
@@ -128,15 +151,30 @@ class LayeredCanvas(QWidget):
     def change_shape_size(self, size):
         self.shape_size = size
 
+    def change_layer_opacity(self, value):
+        self.layer_opacities[self.current_layer_index] = value / 100.0
+        self.update_canvas()
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.draw_shape(event.pos())
+            local_pos = self.canvas_label.mapFrom(self, event.pos())
+            if self.shape == "Pen":
+                self.draw_brush(local_pos)
+            else:
+                self.draw_shape(local_pos)
             self.update_canvas()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
-            self.draw_shape(event.pos())
+        if event.buttons() & Qt.LeftButton and self.shape == "Pen":
+            local_pos = self.canvas_label.mapFrom(self, event.pos())
+            self.draw_brush(local_pos)
             self.update_canvas()
+
+    def draw_brush(self, pos):
+        painter = QPainter(self.layers[self.current_layer_index])
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        painter.drawPoint(pos)
 
     def draw_shape(self, pos):
         painter = QPainter(self.layers[self.current_layer_index])
@@ -144,9 +182,7 @@ class LayeredCanvas(QWidget):
         painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
         painter.setBrush(Qt.NoBrush)
 
-        if self.shape == "Pen":
-            painter.drawPoint(pos)
-        elif self.shape == "Square":
+        if self.shape == "Square":
             painter.drawRect(QRect(pos.x() - self.shape_size // 2, pos.y() - self.shape_size // 2, self.shape_size, self.shape_size))
         elif self.shape == "Triangle":
             path = QPainterPath()
@@ -181,7 +217,8 @@ class LayeredCanvas(QWidget):
     def update_canvas(self):
         self.canvas_pixmap.fill(Qt.white)
         painter = QPainter(self.canvas_pixmap)
-        for layer in self.layers:
+        for i, layer in enumerate(self.layers):
+            painter.setOpacity(self.layer_opacities[i])
             painter.drawImage(0, 0, layer)
         painter.end()
         self.canvas_label.setPixmap(self.canvas_pixmap)

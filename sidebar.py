@@ -21,13 +21,11 @@ class Sidebar(QtWidgets.QWidget):
         self.setLayout(layout)
 
         self.brush_button = QPushButton('Brush')  
-        self.brush_button.setToolTip('Select The Brush tool')
         self.brush_button.setFixedHeight(30)
         self.brush_button.setFixedWidth(80)
         self.brush_button.clicked.connect(self.set_brush_tool)
 
         self.eraser_button = QPushButton('Eraser')
-        self.eraser_button.setToolTip('Select The Eraser Tool')  # Adding tooltip here
         self.eraser_button.setFixedHeight(30)
         self.eraser_button.setFixedWidth(80)
         self.eraser_button.clicked.connect(self.set_eraser_tool)
@@ -40,12 +38,14 @@ class Sidebar(QtWidgets.QWidget):
         size_slider.setValue(20)
         size_slider.valueChanged.connect(self.update_slider_label)
         
-
+        self.color_button = QPushButton('Choose color')
+        self.color_button.clicked.connect(self.open_color_dialog)
+        
         layout.addWidget(self.brush_button)  
         layout.addWidget(self.eraser_button)
         layout.addWidget(self.brush_size_label)
         layout.addWidget(size_slider)
-        layout.addWidget(QtWidgets.QPushButton("Choose color", self))
+        layout.addWidget(self.color_button)
 
         layout.setAlignment(Qt.AlignTop)
 

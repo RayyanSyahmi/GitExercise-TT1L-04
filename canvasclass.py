@@ -26,9 +26,11 @@ class Canvas(QtWidgets.QLabel):
         self.brush = Brush()
         self.eraser = Eraser()
         self.current_tool = None
+        self.lines = []
         self.drawing_points = []
+        self.last_pos = None
         self.setStyleSheet("background-color: white;")
-    
+
     def set_tool(self, tool):
         self.current_tool = tool
 
@@ -48,6 +50,28 @@ class Canvas(QtWidgets.QLabel):
             self.last_pos = event.pos()
             self.drawing_points.append(event.pos())
 
+            line = Line(self.last_pos, event.pos(), self.brush.size)
+            pixmap = QtGui.QPixmap(1080, 720)
+            pixmap.fill(QtCore.Qt.transparent)
+            painter = QtGui.QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            pen = QPen(Qt.transparent)
+            pen.setJoinStyle(Qt.RoundJoin)
+            painter.setPen(pen)
+
+            brush = QBrush(self.brush.color)
+            painter.setBrush(brush)
+
+            gradient = QRadialGradient(line.point1, self.brush.size / 2)
+            gradient.setColorAt(0, self.brush.color)
+            gradient.setColorAt(1, Qt.transparent)
+            brush = QBrush(gradient)
+            painter.setBrush(brush)
+            painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
+
+            self.lines.append(pixmap)
+
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -55,21 +79,9 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        pen = QPen(Qt.transparent)  
-        pen.setJoinStyle(Qt.RoundJoin)  
-        painter.setPen(pen)
-
-        brush = QBrush(self.brush.color)
-        painter.setBrush(brush)
-
-        for point in self.drawing_points:
-            gradient = QRadialGradient(point, self.brush.size / 2)
-            gradient.setColorAt(0, self.brush.color)
-            gradient.setColorAt(1, Qt.transparent)
-            brush = QBrush(gradient)
-            painter.setBrush(brush)
-            painter.drawEllipse(QRectF(point.x() - self.brush.size / 2, point.y() - self.brush.size / 2, self.brush.size, self.brush.size))
+        for line in self.lines:
+            painter.drawPixmap(0, 0, line)
 
     def save(self, filePath):
         pixmap = self.pixmap()
-        pixmap.save(filePath) 
+        pixmap.save(filePath)

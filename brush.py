@@ -17,10 +17,17 @@ class Brush:
     def set_size(self, size):
         self.size = size
 
-class Eraser():
+class Eraser:
     def __init__(self, eraser_size=20, eraser_color=Qt.white):
-        self.eraser_size = eraser_size
-        self.eraser_color = eraser_color
+        self.size = eraser_size
+        self.color = eraser_color
+        self.shape = "square"
+
+    def set_size(self, size):
+        self.size = size
+
+    def set_color(self, color):
+        self.color = color
 
 class BrushInput(QtWidgets.QWidget):
     def __init__(self, brush, canvas):
@@ -42,12 +49,13 @@ class BrushInput(QtWidgets.QWidget):
         self.brush.set_size(new_size)
         self.canvas.brush.size = new_size
         self.canvas.brush.shape = "circle"
-        
+
     def set_brush_radius_from_input(self):
         try:
-            self.brush.size = int(self.brush_size_input.text())
-            self.brush.set_size(self.brush.size)
-            self.brush_size_input.clear()
+            if self.brush_size_input.text():
+                self.brush.size = int(self.brush_size_input.text())
+                self.brush.set_size(self.brush.size)
+                self.brush_size_input.clear()
         except ValueError:
             pass
 
@@ -58,3 +66,9 @@ class BrushInput(QtWidgets.QWidget):
             self.brush.set_color(color)
             self.canvas.brush.color = color
 
+class EraserInput(QtWidgets.QWidget):
+    def __init__(self, eraser, canvas):
+        super().__init__()
+
+        self.canvas = canvas
+        self.eraser = eraser

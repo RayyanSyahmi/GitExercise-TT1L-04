@@ -3,8 +3,9 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from brush import BrushInput, Brush, Eraser
+from brush import BrushInput, Brush, Eraser, EraserInput
 import sys
+import os
 
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
@@ -20,14 +21,21 @@ class Sidebar(QtWidgets.QWidget):
         layout.setSpacing(0)
         self.setLayout(layout)
 
-        self.brush_button = QPushButton('Brush')  
-        self.brush_button.setFixedHeight(30)
-        self.brush_button.setFixedWidth(80)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
+        brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
+        erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
+
+        self.brush_button = QPushButton()  
+        self.brush_button.setFixedHeight(50)
+        self.brush_button.setFixedWidth(50)
+        self.brush_button.setIcon(QIcon(brushicon))  
         self.brush_button.clicked.connect(self.set_brush_tool)
 
-        self.eraser_button = QPushButton('Eraser')
-        self.eraser_button.setFixedHeight(30)
-        self.eraser_button.setFixedWidth(80)
+        self.eraser_button = QPushButton()
+        self.eraser_button.setFixedHeight(50)
+        self.eraser_button.setFixedWidth(50)
+        self.eraser_button.setIcon(QIcon(erasericon)) 
         self.eraser_button.clicked.connect(self.set_eraser_tool)
         
         self.brush_size_label = QtWidgets.QLabel("Size: 20")
@@ -53,7 +61,11 @@ class Sidebar(QtWidgets.QWidget):
         self.brush = Brush()
         self.eraser = Eraser()
         self.brush_size_input = BrushInput(self.brush, self.canvas)
+        self.eraser_size_input = EraserInput(self.eraser, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
+        self.eraser_button.clicked.connect(self.set_eraser_tool)
+
+        self.hide()
 
     def update_slider_label(self, value):
         self.brush_size_label.setText("Size: {}".format(value))
@@ -75,3 +87,9 @@ class Sidebar(QtWidgets.QWidget):
         self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.eraser)
+
+    def hide(self):
+        self.setVisible(False)
+
+    def show(self):
+        self.setVisible(True)

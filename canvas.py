@@ -36,12 +36,8 @@ class Canvas(QtWidgets.QLabel):
         self.current_layer_index = 0
         self.layers_count = 1
 
-        self.add_layer()
         self.change_current_layer(0)
         self.update_canvas()
-
-    def set_tool(self, tool):
-        self.current_tool = tool
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -57,21 +53,17 @@ class Canvas(QtWidgets.QLabel):
                 pixmap.fill(QtCore.Qt.transparent)
                 painter = QtGui.QPainter(pixmap)
                 painter.setRenderHint(QPainter.Antialiasing)
-
                 pen = QPen(Qt.transparent)
                 pen.setJoinStyle(Qt.RoundJoin)
                 painter.setPen(pen)
-
                 brush = QBrush(Qt.white)
                 painter.setBrush(brush)
-
                 gradient = QRadialGradient(line.point1, self.brush.size / 2)
                 gradient.setColorAt(0, Qt.white)
                 gradient.setColorAt(1, Qt.transparent)
                 brush = QBrush(gradient)
                 painter.setBrush(brush)
                 painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
-
                 self.lines.append(pixmap)
         if self.current_tool == self.brush:
             pass
@@ -164,20 +156,30 @@ class Canvas(QtWidgets.QLabel):
         self.change_current_layer(self.current_layer_index)
         if self.layers_count > 1:
             self.update_canvas()
+    
     def remove_layer(self):
         if self.layers_count > 1:
-            self.layers.pop(self.current_layer_index)
+            if self.current_layer_index < 0 or self.current_layer_index >= self.layers_count:
+                self.current_layer_index = 0
+            print(f"Removing layer at index {self.current_layer_index}")
+            del self.layers[self.current_layer_index]
             self.layers_count -= 1
             self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
-
+            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
+    
     def change_current_layer(self, index):
         self.sidebar.change_current_layer(index)
 
     def clear_layer(self):
         if self.layers_count > 0:
-            self.layers[self.current_layer_index].fill(QtCore.Qt.transparent)
-            self.update_canvas()
-
+            try:
+                self.layers[self.current_layer_index - 1].fill(QtCore.Qt.transparent)
+                self.update_canvas()
+            except IndexError:
+                print(f"Error: Unable to fill layer {self.current_layer_index}. Index is out of range.")
+        else:
+            print("Error: No layers to clear.")
+                  
     def update_canvas(self):
         if self.layers_count > 0 and self.current_layer_index < len(self.layers):
             pixmap = QtGui.QPixmap(1080, 720)

@@ -12,6 +12,8 @@ class Sidebar(QtWidgets.QWidget):
         self.prev_selected_color_button = None
         super().__init__()
 
+        
+
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -85,6 +87,7 @@ class Sidebar(QtWidgets.QWidget):
         
         self.layer_combo_box = QtWidgets.QComboBox()
         self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+        self.layer_combo_box.show()
 
         self.add_layer_button = QPushButton('Add Layer')
         self.add_layer_button.clicked.connect(self.add_layer)
@@ -158,7 +161,7 @@ class Sidebar(QtWidgets.QWidget):
         self.brush_size_label.setText("Size: {}".format(value))
 
     
-    def open_color_dialog(self):
+    def open_color_dialog(self, sender=None):
         color = QtWidgets.QColorDialog.getColor()
         if color.isValid():
             self.selected_color = color
@@ -166,9 +169,30 @@ class Sidebar(QtWidgets.QWidget):
             self.brush.set_color(color)
 
             if self.prev_selected_color_button:
-                self.prev_selected_color_button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                self.prev_selected_color_button.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button.setStyleSheet(self.prev_selected_color_button.original_style)
 
+            if sender == self.color_button:
+                if self.prev_selected_color_button:
+                    self.prev_selected_color_button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                    self.prev_selected_color_button.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button = None
+            elif sender == self.quick_color1:
+                self.quick_color1.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                self.quick_color1.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button = self.quick_color1
+            elif sender == self.quick_color2:
+                self.quick_color2.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                self.quick_color2.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button = self.quick_color2
+            elif sender == self.quick_color3:
+                self.quick_color3.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                self.quick_color3.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button = self.quick_color3
+            elif sender == self.quick_color4:
+                self.quick_color4.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                self.quick_color4.original_style = "background-color: {};".format(color.name())
+                self.prev_selected_color_button = self.quick_color4
+    
     def set_brush_tool(self):
         self.active_tool = "Brush"
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: white; border: 2px solid #000000;")
@@ -191,10 +215,12 @@ class Sidebar(QtWidgets.QWidget):
     def change_current_layer(self, index):
         if index >= 0 and index < len(self.canvas.layers):
             self.current_layer_index = index
-            print(f"Current layer index: {self.current_layer_index}")
-            if self.canvas.layers_count > 1:
+            print(f"Current layer index: {index}")
+            if self.canvas.layers_count > 0:  # Check if there are any layers
                 self.canvas.update_canvas()
-                self.layer_combo_box.setCurrentIndex(self.current_layer_index)
+                self.layer_combo_box.setItemText(index, f"Layer {index + 1}")
+        else:
+            print("Error: Layer index is out of range.")
 
     def remove_layer(self):
         if self.canvas.layers_count > 1:
@@ -204,6 +230,13 @@ class Sidebar(QtWidgets.QWidget):
     def clear_layer(self):
         self.canvas.clear_layer()
         self.canvas.update_canvas()
+
+    def start_drawing(self):
+        if self.canvas.layers_count > 0:
+            # Allow the user to draw
+            pass
+        else:
+            print("Please create a layer before drawing")
 
     def hide(self):
         self.setVisible(False)

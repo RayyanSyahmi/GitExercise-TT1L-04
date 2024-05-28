@@ -13,13 +13,13 @@ class MyMenuBar(QtWidgets.QMenuBar):
         self.canvas = canvas
 
         # File Menu
-        file_menu = self.addMenu("File")
+        file_menu = self.addMenu('File')
         file_menu.addAction("New")
         file_menu.addAction("Open")
-
-        save_action = QAction("Save", self)
-        self.save_action = file_menu.addAction("Save")
+        save_action = QAction('Save', self)
+        save_action.setShortcut('Ctrl+S')
         save_action.triggered.connect(self.save)
+        file_menu.addAction(save_action)
 
         # Undo and Redo Actions
         script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +28,10 @@ class MyMenuBar(QtWidgets.QMenuBar):
 
         undo_action = QAction(QIcon(undoicon), 'Undo', self)
         redo_action = QAction(QIcon(redoicon), 'Redo', self)
+
+        # Adding tooltips to Undo and Redo Actions
+        undo_action.setToolTip('Undo ')
+        redo_action.setToolTip('Redo ')
 
         # Adding Undo and Redo Actions to the MenuBar
         self.addAction(undo_action)

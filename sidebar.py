@@ -29,6 +29,8 @@ class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         super().__init__()
 
+        self.active_tool = None
+
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
@@ -104,12 +106,14 @@ class Sidebar(QtWidgets.QWidget):
         self.brush_button.setStyleSheet("background-color: #2196F3; color: white;")
         self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.brush)
+        self.active_tool = None
 
     def set_eraser_tool(self):
         self.active_tool = "Eraser"
         self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.eraser)
+        self.active_tool = None
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -133,17 +137,6 @@ class MainWindow(QMainWindow):
         sidebar = Sidebar(self.canvas)
         main_layout.addWidget(sidebar)
         main_layout.addWidget(self.canvas)
-
-        menubar = self.menuBar()
-        file_menu = menubar.addMenu('File')
-        
-        save_action = QAction('Save', self)
-        save_action.setShortcut('Ctrl+S')
-        save_action.triggered.connect(self.save)
-        file_menu.addAction(save_action)
-
-    def save(self):
-        print("Save action triggered!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

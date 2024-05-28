@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider, QStackedWidget
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider, QStackedWidget, QFileDialog, QToolBar
 from PyQt5.QtGui import QFont, QIcon
 
 class MainWindow(QMainWindow):
@@ -42,14 +42,14 @@ class MainWindow(QMainWindow):
         print(f"Redo icon path: {redoicon}, Exists: {os.path.exists(redoicon)}")
 
         self.brush_button = QPushButton('')
-        self.brush_button.setToolTip('Select The Brush tool')
+        self.brush_button.setToolTip('Select the Brush tool')
         self.brush_button.setFixedHeight(30)
         self.brush_button.setFixedWidth(80)
         self.brush_button.setIcon(QIcon(brushicon))  
         self.brush_button.clicked.connect(lambda: self.set_active_tool("Brush"))
 
         self.eraser_button = QPushButton('')
-        self.eraser_button.setToolTip('Select The Eraser Tool')
+        self.eraser_button.setToolTip('Select the Eraser tool')
         self.eraser_button.setFixedHeight(30)
         self.eraser_button.setFixedWidth(80)
         self.eraser_button.setIcon(QIcon(erasericon))  
@@ -113,24 +113,35 @@ class MainWindow(QMainWindow):
         main_layout.addStretch(1)
 
         menubar = self.menuBar()
-        file_menu = menubar.addMenu('File')
         
+        file_menu = menubar.addMenu('File')
+    
+        file_menu.addAction("New")
+        file_menu.addAction("Open")
         save_action = QAction('Save', self)
         save_action.setShortcut('Ctrl+S')
         save_action.triggered.connect(self.save)
         file_menu.addAction(save_action)
 
-        undo_action = QAction(QIcon(undoicon), 'Undo', self)
-        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+        # Add toolbar
+        toolbar = QToolBar("Main Toolbar")
+        self.addToolBar(toolbar)
 
-        menubar.addAction(undo_action)
-        menubar.addAction(redo_action)
+        undo_action = QAction(QIcon(undoicon), 'Undo', self)
+        undo_action.setToolTip('Undo (Ctrl+Z)')
+        toolbar.addAction(undo_action)
+
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+        redo_action.setToolTip('Redo (Ctrl+Shift+Z)')
+        toolbar.addAction(redo_action)
        
         brush_settings_widget.hide()
         eraser_settings_widget.hide()
 
     def save(self):
         print("Save action triggered!")
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "","PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+
 
     def show_brush_settings(self):
         self.stacked_widget.setCurrentIndex(0)  

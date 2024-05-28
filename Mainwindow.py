@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
-from canvasclass import Canvas
+from canvas import Canvas
 
 
 class MainWindow(QMainWindow):

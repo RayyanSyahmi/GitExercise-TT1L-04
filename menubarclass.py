@@ -3,7 +3,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from canvasclass import Canvas
+from canvas import Canvas
 import sys
 
 class MyMenuBar(QtWidgets.QMenuBar):

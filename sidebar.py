@@ -83,11 +83,27 @@ class Sidebar(QtWidgets.QWidget):
         self.color_button = QPushButton('Choose color')
         self.color_button.clicked.connect(lambda: self.open_color_dialog(self.color_button))
         
+        self.layer_combo_box = QtWidgets.QComboBox()
+        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+
+        self.add_layer_button = QPushButton('Add Layer')
+        self.add_layer_button.clicked.connect(self.add_layer)
+
+        self.remove_layer_button = QPushButton('Remove Layer')
+        self.remove_layer_button.clicked.connect(self.remove_layer)
+
+        self.clear_layer_button = QPushButton('Clear Layer')
+        self.clear_layer_button.clicked.connect(self.clear_layer)
+
         layout.addLayout(button_layout)
         layout.addWidget(self.brush_size_label)
         layout.addWidget(size_slider)
         layout.addWidget(self.color_button)
         layout.addWidget(quick_color_widget)
+        layout.addWidget(self.layer_combo_box)
+        layout.addWidget(self.add_layer_button)
+        layout.addWidget(self.remove_layer_button)
+        layout.addWidget(self.clear_layer_button)
 
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(5)
@@ -114,11 +130,9 @@ class Sidebar(QtWidgets.QWidget):
         self.brush.set_color(color)
         self.selected_color = color
 
-        # Remove border from previously selected color button
         if self.prev_selected_color_button:
             self.prev_selected_color_button.setStyleSheet(self.prev_selected_color_button.original_style)
 
-        # Add border to currently selected color button
         if index == 0:
             self.quick_color1.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
             self.quick_color1.original_style = "background-color: {};".format(color.name())
@@ -132,7 +146,6 @@ class Sidebar(QtWidgets.QWidget):
             self.quick_color4.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
             self.quick_color4.original_style = "background-color: {};".format(color.name())
 
-        # Save the reference to the currently selected color button
         self.prev_selected_color_button = self.quick_color1 if index == 0 else \
                                         self.quick_color2 if index == 1 else \
                                         self.quick_color3 if index == 2 else \
@@ -169,6 +182,28 @@ class Sidebar(QtWidgets.QWidget):
         self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: white; border: 2px solid #000000;")
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.eraser)
+
+    def add_layer(self):
+        self.canvas.add_layer()
+        self.layer_combo_box.addItem('Layer {}'.format(self.canvas.layers_count))
+        self.layer_combo_box.setCurrentIndex(self.layer_combo_box.count() - 1)
+
+    def change_current_layer(self, index):
+        if index >= 0 and index < len(self.canvas.layers):
+            self.current_layer_index = index
+            print(f"Current layer index: {self.current_layer_index}")
+            if self.canvas.layers_count > 1:
+                self.canvas.update_canvas()
+                self.layer_combo_box.setCurrentIndex(self.current_layer_index)
+
+    def remove_layer(self):
+        if self.canvas.layers_count > 1:
+            self.canvas.remove_layer()
+            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
+
+    def clear_layer(self):
+        self.canvas.clear_layer()
+        self.canvas.update_canvas()
 
     def hide(self):
         self.setVisible(False)

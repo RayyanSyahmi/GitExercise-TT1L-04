@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from brush import Brush, Eraser
+from sidebar import Sidebar
 
 class Line:
     def __init__(self, point1, point2, brush_size):
@@ -25,11 +26,19 @@ class Canvas(QtWidgets.QLabel):
         self.update()
         self.brush = Brush()
         self.eraser = Eraser()
+        self.sidebar = Sidebar(self)
         self.current_tool = None
         self.lines = []
         self.drawing_points = []
         self.last_pos = None
         self.setStyleSheet("background-color: white;")
+        self.layers = []
+        self.current_layer_index = 0
+        self.layers_count = 1
+
+        self.add_layer()
+        self.change_current_layer(0)
+        self.update_canvas()
 
     def set_tool(self, tool):
         self.current_tool = tool
@@ -119,7 +128,6 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # Fill the canvas with a white background
         painter.setBrush(Qt.white)
         painter.drawRect(self.rect())
 
@@ -132,7 +140,7 @@ class Canvas(QtWidgets.QLabel):
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
-        # Fill the image with a white background
+
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
 
@@ -141,7 +149,52 @@ class Canvas(QtWidgets.QLabel):
 
         painter.end()
         image.save(filePath)
-    
+
+    def add_layer(self, index=None):
+        layer = QtGui.QPixmap(1080, 720)
+        layer.fill(QtCore.Qt.transparent)
+        if index is not None:
+            self.layers.insert(index, layer)
+            self.layers_count += 1
+            self.current_layer_index = index
+        else:
+            self.layers.append(layer)
+            self.layers_count += 1
+            self.current_layer_index = self.layers_count - 1
+        self.change_current_layer(self.current_layer_index)
+        if self.layers_count > 1:
+            self.update_canvas()
+    def remove_layer(self):
+        if self.layers_count > 1:
+            self.layers.pop(self.current_layer_index)
+            self.layers_count -= 1
+            self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
+
+    def change_current_layer(self, index):
+        self.sidebar.change_current_layer(index)
+
+    def clear_layer(self):
+        if self.layers_count > 0:
+            self.layers[self.current_layer_index].fill(QtCore.Qt.transparent)
+            self.update_canvas()
+
+    def update_canvas(self):
+        if self.layers_count > 0 and self.current_layer_index < len(self.layers):
+            pixmap = QtGui.QPixmap(1080, 720)
+            pixmap.fill(QtCore.Qt.transparent)
+            painter = QtGui.QPainter(pixmap)
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            for layer in self.layers[:self.current_layer_index]:
+                painter.setOpacity(0.5)
+                painter.drawPixmap(0, 0, layer)
+
+            painter.setOpacity(1.0)
+            painter.drawPixmap(0, 0, self.layers[self.current_layer_index])
+
+            painter.end()
+            self.setPixmap(pixmap)
+        
     def set_tool(self, tool):
         print("Setting tool to", tool)
         self.current_tool = tool

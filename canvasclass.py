@@ -119,6 +119,10 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
 
+        # Fill the canvas with a white background
+        painter.setBrush(Qt.white)
+        painter.drawRect(self.rect())
+
         for line in self.lines:
             painter.drawPixmap(0, 0, line)
 
@@ -127,7 +131,14 @@ class Canvas(QtWidgets.QLabel):
         painter = QPainter(image)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
-        painter.drawPixmap(0, 0, self.pixmap())
+
+        # Fill the image with a white background
+        painter.setBrush(Qt.white)
+        painter.drawRect(image.rect())
+
+        for line in self.lines:
+            painter.drawPixmap(0, 0, line)
+
         painter.end()
         image.save(filePath)
     

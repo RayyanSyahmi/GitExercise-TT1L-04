@@ -12,22 +12,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        self.stacked_layout = QStackedLayout()
-        self.central_widget.setLayout(self.stacked_layout)
-
         self.canvas = Canvas()
-        self.sidebar = Sidebar(self.canvas)
+        self.setCentralWidget(self.canvas)
 
-        self.stacked_layout.addWidget(self.canvas)
-        self.stacked_layout.addWidget(self.sidebar)
+        self.sidebar = Sidebar(self.canvas)
+        self.dock_widget = QDockWidget("Tools", self)
+        self.dock_widget.setWidget(self.sidebar)
+        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
 
         self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
 
-        self.sidebar_toggle_action = QAction("Show sidebar", self)
+        self.sidebar_toggle_action = QAction("Tools", self)
         self.sidebar_toggle_action.triggered.connect(self.toggle_sidebar)
         self.menu_bar.addAction(self.sidebar_toggle_action)
 
@@ -35,15 +32,13 @@ class MainWindow(QMainWindow):
         self.show()
 
     def toggle_sidebar(self):
-        if self.sidebar.isVisible():
-            self.sidebar.hide()
-            self.sidebar_toggle_action.setText("Show sidebar")
-            self.stacked_layout.setCurrentWidget(self.canvas)
+        if self.dock_widget.isVisible():
+            self.dock_widget.hide()
+            self.sidebar_toggle_action.setText("Tools")
         else:
-            self.sidebar.show()
-            self.sidebar_toggle_action.setText("Hide sidebar")
-            self.stacked_layout.setCurrentWidget(self.sidebar)
-
+            self.dock_widget.show()
+            self.sidebar_toggle_action.setText("Tools")
+            
 app = QApplication(sys.argv)
 app.setFont(QFont("Segoe UI", 9))
 app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")

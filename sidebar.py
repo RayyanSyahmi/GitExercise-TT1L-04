@@ -1,9 +1,12 @@
 import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QIcon
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction, QPushButton, QVBoxLayout, QWidget, QLabel, QSlider, QStackedWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+    QMainWindow, QApplication, QAction, QPushButton, QVBoxLayout,
+    QWidget, QLabel, QSlider, QStackedWidget, QToolBar
+)
 
 class BrushInput:
     def __init__(self, brush, canvas):
@@ -25,7 +28,7 @@ class Eraser:
     def __init__(self):
         self.size = 5
 
-class Sidebar(QtWidgets.QWidget):
+class Sidebar(QWidget):
     def __init__(self, canvas):
         super().__init__()
 
@@ -37,7 +40,7 @@ class Sidebar(QtWidgets.QWidget):
         palette.setColor(QtGui.QPalette.Window, Qt.white)
         self.setPalette(palette)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout()
         layout.setSpacing(0)
         self.setLayout(layout)
 
@@ -101,19 +104,23 @@ class Sidebar(QtWidgets.QWidget):
             self.brush.color = color
             self.brush.set_color(color)
 
+    def reset_tool_styles(self):
+        self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+
     def set_brush_tool(self):
+        self.reset_tool_styles()
         self.active_tool = "Brush"
         self.brush_button.setStyleSheet("background-color: #2196F3; color: white;")
-        self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.brush)
-        self.active_tool = None
+        self.active_tool = None  
 
     def set_eraser_tool(self):
+        self.reset_tool_styles()
         self.active_tool = "Eraser"
         self.eraser_button.setStyleSheet("background-color: #2196F3; color: white;")
-        self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.eraser)
-        self.active_tool = None
+        self.active_tool = None  
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -137,6 +144,32 @@ class MainWindow(QMainWindow):
         sidebar = Sidebar(self.canvas)
         main_layout.addWidget(sidebar)
         main_layout.addWidget(self.canvas)
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
+        redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
+
+        menubar = self.menuBar()
+        
+        file_menu = menubar.addMenu('File')
+    
+        file_menu.addAction("New")
+        file_menu.addAction("Open")
+        save_action = QAction('Save', self)
+        save_action.setShortcut('Ctrl+S')
+        file_menu.addAction(save_action)
+
+        # Add toolbar
+        toolbar = QToolBar("Main Toolbar")
+        self.addToolBar(toolbar)
+
+        undo_action = QAction(QIcon(undoicon), 'Undo', self)
+        undo_action.setToolTip('Undo (Ctrl+Z)')
+        toolbar.addAction(undo_action)
+
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+        redo_action.setToolTip('Redo (Ctrl+Shift+Z)')
+        toolbar.addAction(redo_action)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

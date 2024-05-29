@@ -1,12 +1,8 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from menubarclass import MyMenuBar
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget
+from PyQt5.QtGui import QFont
 from sidebar import Sidebar
 from canvasclass import Canvas
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -25,10 +21,6 @@ class MainWindow(QMainWindow):
         self.main_h_layout.addWidget(self.sidebar)
         self.main_h_layout.addWidget(self.canvas)
 
-
-        self.menu_bar = MyMenuBar(self.canvas)
-        self.setMenuBar(self.menu_bar)
-        
         self.move(0, 0)
         self.show()
 

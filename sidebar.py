@@ -12,8 +12,6 @@ class Sidebar(QtWidgets.QWidget):
         self.prev_selected_color_button = None
         super().__init__()
 
-        
-
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()

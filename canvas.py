@@ -36,13 +36,50 @@ class Canvas(QtWidgets.QLabel):
         self.current_layer_index = 0
         self.layers_count = 1
 
+        self.image = QtGui.QImage(self.size(), QtGui.QImage.Format_RGB32)
+        self.image.fill(QtCore.Qt.white)
+
+        self.drawing = False
+        self.last_pos = QtCore.QPoint()
+        self.drawing_points = []
+        self.lines = []
+
+
+        # Undo/Redo stacks
+        self.undo_stack = []
+        self.redo_stack = []
+
         self.change_current_layer(0)
         self.update_canvas()
 
+    def save_state(self):
+        self.undo_stack.append(self.pixmap().copy())
+        self.redo_stack.clear()
+
+    def restore_state(self, state):
+        self.setPixmap(state)
+        self.update()
+
+    def undo(self):
+        if self.undo_stack:
+            self.redo_stack.append(self.image.copy())
+            self.image = self.undo_stack.pop()
+            self.update()
+
+    def redo(self):
+        if self.redo_stack:
+            self.undo_stack.append(self.image.copy())
+            self.image = self.redo_stack.pop()
+            self.update()
+
+    def clearImage(self):
+        self.image.fill(Qt.white)
+        self.update()
+
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
+            self.save_state()
             if self.current_tool == self.eraser:
-                self.save_state()
                 self.last_pos = event.pos()
                 self.drawing_points.append(event.pos())
             else:
@@ -77,7 +114,6 @@ class Canvas(QtWidgets.QLabel):
             distance = QtCore.QLineF(self.last_pos, event.pos()).length()
             if distance > self.brush.size / 10000:
                 if self.current_tool == self.eraser:
-                    self.restore_state()
                     self.last_pos = event.pos()
                     self.drawing_points.append(event.pos())
                 else:
@@ -165,7 +201,7 @@ class Canvas(QtWidgets.QLabel):
             del self.layers[self.current_layer_index]
             self.layers_count -= 1
             self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
-            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
+            self.sidebar.layer_combo_box.removeItem(self.sidebar.layer_combo_box.currentIndex())
     
     def change_current_layer(self, index):
         self.sidebar.change_current_layer(index)

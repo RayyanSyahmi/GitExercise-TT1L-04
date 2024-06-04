@@ -7,7 +7,6 @@ from menubarclass import MyMenuBar
 from sidebar import Sidebar
 from canvasclass import Canvas
 
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -25,11 +24,15 @@ class MainWindow(QMainWindow):
         self.main_h_layout.addWidget(self.sidebar)
         self.main_h_layout.addWidget(self.canvas)
 
-        self.menu_bar = MyMenuBar()
+        self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
-        
+
         self.move(0, 0)
         self.show()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.canvas.adjustSize()
 
 app = QApplication(sys.argv)
 app.setFont(QFont("Segoe UI", 9))

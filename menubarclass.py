@@ -13,8 +13,6 @@ class MyMenuBar(QtWidgets.QMenuBar):
         self.canvas = canvas
 
         file_menu = self.addMenu("File")
-        file_menu.addAction("New")
-        file_menu.addAction("Open")
 
         saveAction = QAction("Save", self)
         saveAction.triggered.connect(self.save)

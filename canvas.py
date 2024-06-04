@@ -17,21 +17,20 @@ class Canvas(QtWidgets.QLabel):
     def __init__(self):
         super().__init__()
 
-        self.setPixmap(QtGui.QPixmap(1080, 720))
+        
         pixmap = QtGui.QPixmap(1080, 720)
         pixmap.fill(QtCore.Qt.white)
-        painter = QtGui.QPainter(pixmap)
-        painter.end()
         self.setPixmap(pixmap)
-        self.update()
+        
         self.brush = Brush()
         self.eraser = Eraser()
         self.sidebar = Sidebar(self)
-        self.current_tool = None
+        self.setStyleSheet("background-color: white;")
+        
         self.lines = []
         self.drawing_points = []
-        self.last_pos = None
-        self.setStyleSheet("background-color: white;")
+        
+
         self.layers = []
         self.current_layer_index = 0
         self.layers_count = 1

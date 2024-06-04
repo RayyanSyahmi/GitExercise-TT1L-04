@@ -25,28 +25,28 @@ class UndoButtonExample(QWidget):
             self.previous_value = current_value
             self.entry.setText(self.previous_value[:-1])
 
-    def save_file(self):
-        types = [("Text Files", "*.txt"),
-                 ("All Files", "*.*"),
-                 ("Png Files", "*.png"),
-                 ("Jpeg Files", "*.jpg *.jpeg")]
+   
+        file_menu = self.addMenu("File")
+        file_menu.addAction("New")
+        file_menu.addAction("Open")
 
-        file_path, _ = QFileDialog.getSaveFileName(self,
-                                                    "Drawing app saving",
-                                                    "",
-                                                    "Text Files (*.txt);;Png Files (*.png);;Jpeg Files (*.jpg *.jpeg)",
-                                                    options=QFileDialog.DontUseNativeDialog)
+        saveAction = QAction("Save", self) # type: ignore
+        saveAction.triggered.connect(self.save)
+        self.save_action = file_menu.addAction(saveAction)
 
-        if file_path:
+    def save(self):
+        print("Save button pressed")
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
+                        "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
+    
+
+        if file_path: # type: ignore
             data = self.entry.text()
-            with open(file_path, mode='w') as file_writter:
+            with open(file_path, mode='w') as file_writter: # type: ignore
                 file_writter.write(data)
 
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    ex = UndoButtonExample()
-    ex.show()
 
-    ex.save_file()
 
-    sys.exit(app.exec_())
+        if filePath == "":
+            return
+        self.canvas.save(filePath)

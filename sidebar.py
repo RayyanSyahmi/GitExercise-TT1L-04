@@ -96,6 +96,8 @@ class Sidebar(QtWidgets.QWidget):
 
     def update_size_label(self, value):
         self.brush_size_label.setText(f"Size: {value}")
+    def update_slider_label(self, value):
+        self.brush_size_label.setText("Size: {}".format(value))
 
     def open_color_dialog(self):
         color = QtWidgets.QColorDialog.getColor()

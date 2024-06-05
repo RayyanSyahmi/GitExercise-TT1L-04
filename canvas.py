@@ -1,5 +1,12 @@
 import sys
-import PyQt5 
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from brush import Brush, Eraser
+from sidebar import Sidebar
+
+import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -26,7 +33,6 @@ class Canvas(QtWidgets.QLabel):
         self.update()
         self.brush = Brush()
         self.eraser = Eraser()
-        self.sidebar = Sidebar(self)
         self.current_tool = None
         self.lines = []
         self.drawing_points = []
@@ -35,9 +41,21 @@ class Canvas(QtWidgets.QLabel):
         self.layers = []
         self.current_layer_index = 0
         self.layers_count = 1
+        self.selection_start_pos = None
+        self.selecting = False
 
+        self.sidebar = Sidebar(self)  # Initialize sidebar before changing the current layer
+        self.sidebar.currentLayerChanged.connect(self.change_current_layer)
         self.change_current_layer(0)
         self.update_canvas()
+
+        self.pen_color = QColor(0, 0, 0)
+        self.pen_width = 5
+        self.fill_color = self.brush.color  # Initialize fill color with brush color
+        self.is_drawing = False
+        self.selection_start = None
+        self.selection_end = None
+        self.is_selecting = False
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
@@ -53,85 +71,72 @@ class Canvas(QtWidgets.QLabel):
                 pixmap.fill(QtCore.Qt.transparent)
                 painter = QtGui.QPainter(pixmap)
                 painter.setRenderHint(QPainter.Antialiasing)
-                pen = QPen(Qt.transparent)
-                pen.setJoinStyle(Qt.RoundJoin)
+                pen = QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
                 painter.setPen(pen)
-                brush = QBrush(Qt.white)
-                painter.setBrush(brush)
-                gradient = QRadialGradient(line.point1, self.brush.size / 2)
-                gradient.setColorAt(0, Qt.white)
-                gradient.setColorAt(1, Qt.transparent)
-                brush = QBrush(gradient)
-                painter.setBrush(brush)
-                painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
+                painter.drawLine(self.last_pos, event.pos())
+                painter.end()
                 self.lines.append(pixmap)
-        if self.current_tool == self.brush:
-            pass
-        elif self.current_tool == self.eraser:
-            pass
-        else:
-            pass
+        elif event.button() == QtCore.Qt.RightButton:
+            self.selecting = True
+            self.selection_start_pos = event.pos()
 
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.LeftButton and self.last_pos:
-            distance = QtCore.QLineF(self.last_pos, event.pos()).length()
-            if distance > self.brush.size / 10000:
-                if self.current_tool == self.eraser:
-                    self.restore_state()
-                    self.last_pos = event.pos()
-                    self.drawing_points.append(event.pos())
-                else:
-                    painter = QtGui.QPainter(self.pixmap())
-                    pen = QtGui.QPen(QtGui.QPen(self.brush.color, self.brush.size))
-                    painter.setPen(pen)
-                    painter.drawLine(self.last_pos, event.pos())
-                    painter.end()
-                    self.update()
-                    self.last_pos = event.pos()
-                    self.drawing_points.append(event.pos())
+            if self.current_tool == self.eraser:
+                self.restore_state()
+                self.last_pos = event.pos()
+                self.drawing_points.append(event.pos())
+            else:
+                painter = QtGui.QPainter(self.pixmap())
+                pen = QtGui.QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+                painter.setPen(pen)
+                painter.drawLine(self.last_pos, event.pos())
+                painter.end()
+                self.update()
+                self.last_pos = event.pos()
+                self.drawing_points.append(event.pos())
 
-                    line = Line(self.last_pos, event.pos(), self.brush.size)
-                    pixmap = QtGui.QPixmap(1080, 720)
-                    pixmap.fill(QtCore.Qt.transparent)
-                    painter = QtGui.QPainter(pixmap)
-                    painter.setRenderHint(QPainter.Antialiasing)
-
-                    pen = QPen(Qt.transparent)
-                    pen.setJoinStyle(Qt.RoundJoin)
-                    painter.setPen(pen)
-
-                    brush = QBrush(self.brush.color)
-                    painter.setBrush(brush)
-
-                    gradient = QRadialGradient(line.point1, self.brush.size / 2)
-                    gradient.setColorAt(0, self.brush.color)
-                    gradient.setColorAt(1, Qt.transparent)
-                    brush = QBrush(gradient)
-                    painter.setBrush(brush)
-                    painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
-
-                    self.lines.append(pixmap)
-
-
-    def update_brush_size(self, new_size):
-        self.brush.size = new_size
+                line = Line(self.last_pos, event.pos(), self.brush.size)
+                pixmap = QtGui.QPixmap(1080, 720)
+                pixmap.fill(QtCore.Qt.transparent)
+                painter = QtGui.QPainter(pixmap)
+                painter.setRenderHint(QPainter.Antialiasing)
+                painter.setPen(pen)
+                painter.drawLine(self.last_pos, event.pos())
+                painter.end()
+                self.lines.append(pixmap)
+        elif self.selecting:
+            # Draw the selection rectangle
+            pixmap = QtGui.QPixmap(self.pixmap())
+            painter = QtGui.QPainter(pixmap)
+            painter.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0), 1, QtCore.Qt.DashLine))
+            painter.drawRect(QtCore.QRect(self.selection_start_pos, event.pos()))
+            painter.end()
+            self.setPixmap(pixmap)
+    def mouseReleaseEvent(self, event):
+        if event.button() == QtCore.Qt.RightButton and self.selecting:
+            self.selecting = False
+            self.delete_selection()
 
     def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        canvas_painter = QPainter(self)
+        for layer in self.layers:
+            canvas_painter.drawPixmap(0, 0, layer)
+        if self.selection_start and self.selection_end:
+            selection_rect = QRect(self.selection_start, self.selection_end)
+            canvas_painter.setPen(QPen(Qt.blue, 1, Qt.DashLine))
+            canvas_painter.drawRect(selection_rect)
 
-        painter.setBrush(Qt.white)
-        painter.drawRect(self.rect())
-
-        for line in self.lines:
-            painter.drawPixmap(0, 0, line)
+    def fill_color(self, color):
+        self.brush.color = color  # Set brush color to fill color
+        self.fill_color = color  # Update fill color
+        self.sidebar.update_size_label(color.name())
 
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)
         painter = QPainter(image)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
-
 
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
@@ -143,7 +148,7 @@ class Canvas(QtWidgets.QLabel):
         image.save(filePath)
 
     def add_layer(self, index=None):
-        layer = QtGui.QPixmap(1080, 720)
+        layer = QPixmap(1080, 720)
         layer.fill(QtCore.Qt.transparent)
         if index is not None:
             self.layers.insert(index, layer)
@@ -156,30 +161,30 @@ class Canvas(QtWidgets.QLabel):
         self.change_current_layer(self.current_layer_index)
         if self.layers_count > 1:
             self.update_canvas()
-    
+
     def remove_layer(self):
         if self.layers_count > 1:
             if self.current_layer_index < 0 or self.current_layer_index >= self.layers_count:
                 self.current_layer_index = 0
-            print(f"Removing layer at index {self.current_layer_index}")
             del self.layers[self.current_layer_index]
             self.layers_count -= 1
             self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
-            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
-    
+
     def change_current_layer(self, index):
         self.sidebar.change_current_layer(index)
+        self.current_layer_index = index
+        self.update_canvas()
 
     def clear_layer(self):
         if self.layers_count > 0:
             try:
-                self.layers[self.current_layer_index - 1].fill(QtCore.Qt.transparent)
+                self.layers[self.current_layer_index].fill(QtCore.Qt.transparent)
                 self.update_canvas()
             except IndexError:
                 print(f"Error: Unable to fill layer {self.current_layer_index}. Index is out of range.")
         else:
             print("Error: No layers to clear.")
-                  
+
     def update_canvas(self):
         if self.layers_count > 0 and self.current_layer_index < len(self.layers):
             pixmap = QtGui.QPixmap(1080, 720)
@@ -196,7 +201,49 @@ class Canvas(QtWidgets.QLabel):
 
             painter.end()
             self.setPixmap(pixmap)
-        
+
     def set_tool(self, tool):
-        print("Setting tool to", tool)
         self.current_tool = tool
+
+    def delete_selection(self):
+        if self.selecting:
+            self.selecting = False
+            start_pos = self.selection_start_pos
+            end_pos = self.last_pos
+            self.selection_start_pos = None
+
+            rect = QtCore.QRect(min(start_pos.x(), end_pos.x()), min(start_pos.y(), end_pos.y()), abs(end_pos.x() - start_pos.x()), abs(end_pos.y() - start_pos.y()))
+
+            pixmap = self.pixmap()
+            painter = QtGui.QPainter(pixmap)
+            painter.setCompositionMode(QPainter.CompositionMode_Clear)
+            painter.eraseRect(rect)
+            painter.end()
+
+            self.setPixmap(pixmap)
+            self.update()
+
+    def fill_selection(self, start, end):
+        if start and end:
+            selection_rect = QRect(start, end)
+            for layer in self.layers:
+                painter = QtGui.QPainter(layer)
+                painter.setCompositionMode(QPainter.CompositionMode_Source)
+                painter.fillRect(selection_rect, self.fill_color)
+                painter.end()
+            self.update_canvas()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        fill_action = menu.addAction("Fill Selection")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == fill_action:
+            self.fill_selection(self.selection_start, self.selection_end)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    canvas = Canvas()
+    canvas.setWindowTitle("Drawing Application")
+    canvas.show()
+    sys.exit(app.exec_())
+

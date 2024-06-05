@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import PyQt5 
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
@@ -38,7 +37,6 @@ class MyMenuBar(QtWidgets.QMenuBar):
     
         if filePath == "":
             return
-=======
 import PyQt5 
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
@@ -67,5 +65,4 @@ class MyMenuBar(QtWidgets.QMenuBar):
     
         if filePath == "":
             return
->>>>>>> 5af4395bd3dfeb877c677fe2f9eb3babe5054877
         self.canvas.save(filePath)

@@ -38,7 +38,50 @@ class MainWindow(QMainWindow):
         else:
             self.dock_widget.show()
             self.sidebar_toggle.setText("Tools")
+
+    def fill_selection(self, start, end):
+        if start and end:
+            selection_rect = QRect(start, end)
+            for layer in self.layers:
+                painter = QtGui.QPainter(layer)
+                painter.setCompositionMode(QPainter.CompositionMode_Source)
+                painter.fillRect(selection_rect, self.fill_color)
+                painter.end()
+            self.update_canvas()
             
+    def fill(self, point):
+        target_color = self.pixmap().toImage().pixelColor(point)
+        if target_color == self.brush.color:
+            return  # No need to fill if the target color is the same as the fill color
+
+        stack = [point]
+        while stack:
+            current_point = stack.pop()
+            x, y = current_point.x(), current_point.y()
+            if x < 0 or y < 0 or x >= self.pixmap().width() or y >= self.pixmap().height():
+                continue
+
+            current_color = self.pixmap().toImage().pixelColor(current_point)
+            if current_color == target_color:
+                painter = QtGui.QPainter(self.pixmap())
+                painter.setPen(self.brush.color)
+                painter.drawPoint(current_point)
+                painter.end()
+
+                stack.append(QPoint(x + 1, y))
+                stack.append(QPoint(x - 1, y))
+                stack.append(QPoint(x, y + 1))
+                stack.append(QPoint(x, y - 1))
+
+        self.update()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        fill_action = menu.addAction("Fill Selection")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == fill_action:
+            self.fill_selection(self.selection_start, self.selection_end)
+
 app = QApplication(sys.argv)
 app.setFont(QFont("Segoe UI", 9))
 app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")

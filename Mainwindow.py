@@ -1,48 +1,90 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QMainWindow, QApplication, QDockWidget, QAction
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
-from brushes import Brush
-from canvasclass import Canvas
+from canvas import Canvas
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        print("MainWindow initialized")
-        self.setWindowTitle("Paint app")
-        self.setGeometry(0, 0, 1280, 720)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        self.vbox_layout = QVBoxLayout()
-        self.central_widget.setLayout(self.vbox_layout)
-
-        self.main_h_layout = QHBoxLayout()
-        self.vbox_layout.addLayout(self.main_h_layout)
-
-        self.sidebar = Sidebar()
-        self.main_h_layout.addWidget(self.sidebar)
-
-        self.brush = Brush()
         self.canvas = Canvas()
-        self.canvas.brush = self.brush
-        self.main_h_layout.addWidget(self.canvas)
+        self.setCentralWidget(self.canvas)
 
-        self.menu_bar = MyMenuBar()
+        self.sidebar = Sidebar(self.canvas)
+        self.dock_widget = QDockWidget("Tools", self)
+        self.dock_widget.setWidget(self.sidebar)
+        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
+
+        self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
 
+        self.sidebar_toggle = QAction("Tools", self)
+        self.sidebar_toggle.triggered.connect(self.toggle_sidebar)
+        self.menu_bar.addAction(self.sidebar_toggle)
+
+        self.move(0, 0)
         self.show()
-        
-        print("MainWindow initialized complete")
+
+    def toggle_sidebar(self):
+        if self.dock_widget.isVisible():
+            self.dock_widget.hide()
+            self.sidebar_toggle.setText("Tools")
+        else:
+            self.dock_widget.show()
+            self.sidebar_toggle.setText("Tools")
+
+    def fill_selection(self, start, end):
+        if start and end:
+            selection_rect = QRect(start, end)
+            for layer in self.layers:
+                painter = QtGui.QPainter(layer)
+                painter.setCompositionMode(QPainter.CompositionMode_Source)
+                painter.fillRect(selection_rect, self.fill_color)
+                painter.end()
+            self.update_canvas()
+            
+    def fill(self, point):
+        target_color = self.pixmap().toImage().pixelColor(point)
+        if target_color == self.brush.color:
+            return  # No need to fill if the target color is the same as the fill color
+
+        stack = [point]
+        while stack:
+            current_point = stack.pop()
+            x, y = current_point.x(), current_point.y()
+            if x < 0 or y < 0 or x >= self.pixmap().width() or y >= self.pixmap().height():
+                continue
+
+            current_color = self.pixmap().toImage().pixelColor(current_point)
+            if current_color == target_color:
+                painter = QtGui.QPainter(self.pixmap())
+                painter.setPen(self.brush.color)
+                painter.drawPoint(current_point)
+                painter.end()
+
+                stack.append(QPoint(x + 1, y))
+                stack.append(QPoint(x - 1, y))
+                stack.append(QPoint(x, y + 1))
+                stack.append(QPoint(x, y - 1))
+
+        self.update()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        fill_action = menu.addAction("Fill Selection")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == fill_action:
+            self.fill_selection(self.selection_start, self.selection_end)
 
 app = QApplication(sys.argv)
-
+app.setFont(QFont("Segoe UI", 9))
+app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
 main_window = MainWindow()
 main_window.show()
-
 sys.exit(app.exec_())

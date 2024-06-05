@@ -128,22 +128,30 @@ class Sidebar(QtWidgets.QWidget):
         self.quick_color1 = QtWidgets.QPushButton()
         self.quick_color1.setFixedSize(30, 30)
         self.quick_color1.setStyleSheet("background-color: #000000")  # Black
+        self.quick_color1.setToolTip("<font color='white'>Black</font>")
         self.quick_color1.clicked.connect(lambda: self.set_brush_color(0))
+
+
+
 
         self.quick_color2 = QtWidgets.QPushButton()
         self.quick_color2.setFixedSize(30, 30)
         self.quick_color2.setStyleSheet("background-color: #FFFFFF")  # White
+        self.quick_color2.setToolTip("White")
         self.quick_color2.clicked.connect(lambda: self.set_brush_color(1))
 
         self.quick_color3 = QtWidgets.QPushButton()
         self.quick_color3.setFixedSize(30, 30)
         self.quick_color3.setStyleSheet("background-color: #007300")  # Green
+        self.quick_color3.setToolTip("Green")
         self.quick_color3.clicked.connect(lambda: self.set_brush_color(2))
 
         self.quick_color4 = QtWidgets.QPushButton()
         self.quick_color4.setFixedSize(30, 30)
         self.quick_color4.setStyleSheet("background-color: #FFFF00")  # Yellow
+        self.quick_color4.setToolTip("Yellow")
         self.quick_color4.clicked.connect(lambda: self.set_brush_color(3))
+
 
         quick_color_layout = QtWidgets.QHBoxLayout()
         quick_color_layout.addWidget(self.quick_color1)

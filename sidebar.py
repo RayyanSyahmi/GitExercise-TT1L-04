@@ -7,6 +7,75 @@ from brush import BrushInput, Brush, Eraser, EraserInput
 import sys
 import os
 
+class BrushInput:
+    def __init__(self, brush, canvas):
+        self.brush = brush
+        self.canvas = canvas
+
+    def update_brush_size(self, size):
+        self.brush.size = size
+        self.canvas.update()
+
+
+class Brush:
+    def __init__(self):
+        self.size = 20
+        self.color = QtGui.QColor("#000000")
+
+    def set_color(self, color):
+        self.color = color
+
+
+class EraserInput:
+    def __init__(self, eraser, canvas):
+        self.eraser = eraser
+        self.canvas = canvas
+
+    def update_eraser_size(self, size):
+        self.eraser.size = size
+        self.canvas.update()
+
+
+class Eraser:
+    def __init__(self):
+        self.size = 20
+
+
+class Canvas(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setStyleSheet("background-color: white;")
+        self.layers = []
+        self.current_layer_index = 0
+        self.layers_count = 0
+
+    def add_layer(self):
+        self.layers.append(QtWidgets.QPixmap(self.size()))
+        self.current_layer_index = len(self.layers) - 1
+        self.layers_count += 1
+
+    def remove_layer(self):
+        if self.layers_count > 1:
+            del self.layers[self.current_layer_index]
+            self.current_layer_index = max(0, self.current_layer_index - 1)
+            self.layers_count -= 1
+
+    def clear_layer(self):
+        self.layers[self.current_layer_index].fill(QtCore.Qt.transparent)
+
+    def undo(self):
+        print("Undo action")
+
+    def redo(self):
+        print("Redo action")
+
+    def set_tool(self, tool):
+        pass
+
+    def update_canvas(self):
+        pass
+
+
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         self.prev_selected_color_button = None
@@ -26,6 +95,22 @@ class Sidebar(QtWidgets.QWidget):
 
         brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
         erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
+        undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
+        redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
+
+        self.undo_button = QtWidgets.QPushButton()
+        self.undo_button.setFixedSize(50, 50)
+        self.undo_button.setIcon(QtGui.QIcon(undoicon))
+        self.undo_button.setToolTip('Undo')
+        self.undo_button.clicked.connect(canvas.undo)
+
+        self.redo_button = QtWidgets.QPushButton()
+        self.redo_button.setFixedSize(50, 50)
+        self.redo_button.setIcon(QtGui.QIcon(redoicon))
+        self.redo_button.setToolTip('Redo')
+        self.redo_button.clicked.connect(canvas.redo)
+
+        self.brush_button = QtWidgets.QPushButton()
 
         self.brush_button = QPushButton()  
         self.brush_button.setFixedSize(50, 50)
@@ -42,7 +127,9 @@ class Sidebar(QtWidgets.QWidget):
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.brush_button)
         button_layout.addWidget(self.eraser_button)
-        button_layout.setAlignment(Qt.AlignLeft)
+        button_layout.addWidget(self.undo_button)
+        button_layout.addWidget(self.redo_button)
+        button_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         self.quick_color1 = QPushButton()
         self.quick_color1.setFixedSize(30, 30)
@@ -240,7 +327,7 @@ class Sidebar(QtWidgets.QWidget):
         self.canvas.update_canvas()
 
     def fill_color(self):
-        self.canvas.set_tool("fill")
+        pass
 
     def pickout_color(self, color):
         painter = QtGui.QPainter(self.pixmap())

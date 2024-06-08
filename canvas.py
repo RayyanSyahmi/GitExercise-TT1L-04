@@ -163,6 +163,13 @@ class Canvas(QtWidgets.QLabel):
 
         for line in self.lines:
             painter.drawPixmap(0, 0, line)
+            
+    def color_pickout(self, color,):
+        print ("pick")
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
+        brush.setColor(color)
+        brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)

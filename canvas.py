@@ -163,6 +163,13 @@ class Canvas(QtWidgets.QLabel):
 
         for line in self.lines:
             painter.drawPixmap(0, 0, line)
+            
+    def color_pickout(self, color,):
+        print ("pick")
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
+        brush.setColor(color)
+        brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)
@@ -237,13 +244,8 @@ class Canvas(QtWidgets.QLabel):
             painter.drawPixmap(0, 0, self.layers[self.current_layer_index])
 
             painter.end()
-            self.update()
-            #keep track of mouse movement
-            self.last_pos = event.pos()
-
-app = QtWidgets.QApplication(sys.argv)
-
-window = PaintCanvas()
-window.show()
-
-app.exec_()
+            self.setPixmap(pixmap)
+        
+    def set_tool(self, tool):
+        print("Setting tool to", tool)
+        self.current_tool = tool

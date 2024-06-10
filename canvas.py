@@ -57,12 +57,6 @@ class Canvas(QtWidgets.QLabel):
                 painter.setPen(pen)
                 brush = QBrush(Qt.white)
                 painter.setBrush(brush)
-                gradient = QRadialGradient(line.point1, self.brush.size / 2)
-                gradient.setColorAt(0, Qt.white)
-                gradient.setColorAt(1, Qt.transparent)
-                brush = QBrush(gradient)
-                painter.setBrush(brush)
-                painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
                 self.lines.append(pixmap)
         if self.current_tool == self.brush:
             pass
@@ -73,6 +67,7 @@ class Canvas(QtWidgets.QLabel):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & QtCore.Qt.LeftButton and self.last_pos:
+            
             distance = QtCore.QLineF(self.last_pos, event.pos()).length()
             if distance > self.brush.size / 10000:
                 if self.current_tool == self.eraser:
@@ -95,19 +90,7 @@ class Canvas(QtWidgets.QLabel):
                     painter = QtGui.QPainter(pixmap)
                     painter.setRenderHint(QPainter.Antialiasing)
 
-                    pen = QPen(Qt.transparent)
-                    pen.setJoinStyle(Qt.RoundJoin)
-                    painter.setPen(pen)
-
-                    brush = QBrush(self.brush.color)
-                    painter.setBrush(brush)
-
-                    gradient = QRadialGradient(line.point1, self.brush.size / 2)
-                    gradient.setColorAt(0, self.brush.color)
-                    gradient.setColorAt(1, Qt.transparent)
-                    brush = QBrush(gradient)
-                    painter.setBrush(brush)
-                    painter.drawEllipse(QRectF(line.point1.x() - self.brush.size / 2, line.point1.y() - self.brush.size / 2, self.brush.size, self.brush.size))
+                    self.brush.draw_brush_at_point(painter, line.point1)
 
                     self.lines.append(pixmap)
 

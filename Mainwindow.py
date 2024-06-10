@@ -1,12 +1,10 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QAction
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
 from canvas import Canvas
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -39,9 +37,10 @@ class MainWindow(QMainWindow):
             self.dock_widget.show()
             self.sidebar_toggle.setText("Tools")
             
-app = QApplication(sys.argv)
-app.setFont(QFont("Segoe UI", 9))
-app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
-main_window = MainWindow()
-main_window.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setFont(QFont("Segoe UI", 9))
+    app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec_())

@@ -17,7 +17,6 @@ class Brush:
         self.size = size
 
     def create_radial_gradient_brush(self, point):
-        
         gradient = QRadialGradient(point, self.size / 2)
         gradient.setColorAt(0, self.color)
         gradient.setColorAt(1, Qt.transparent)

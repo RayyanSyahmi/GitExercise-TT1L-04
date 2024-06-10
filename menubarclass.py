@@ -12,28 +12,44 @@ class MyMenuBar(QtWidgets.QMenuBar):
         super().__init__()
         self.canvas = canvas
 
+        # File menu
         file_menu = self.addMenu("File")
 
+        # Save action
         saveAction = QAction("Save", self)
         saveAction.triggered.connect(self.save)
-        self.save_action = file_menu.addAction(saveAction)
+        file_menu.addAction(saveAction)
 
+        # Path to icons
         script_dir = os.path.dirname(os.path.abspath(__file__))
         undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
         redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
 
+        # Undo action
         undo_action = QAction(QIcon(undoicon), 'Undo', self)
-        redo_action = QAction(QIcon(redoicon), 'Redo', self)
-
+        undo_action.triggered.connect(self.canvas.undo)
         self.addAction(undo_action)
-        self.addAction(redo_action)
 
+        # Redo action
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+        redo_action.triggered.connect(self.canvas.redo)
+        self.addAction(redo_action)
 
     def save(self):
         print("Save button pressed")
         filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
                         "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
-    
+
         if filePath == "":
             return
         self.canvas.save(filePath)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    canvas = Canvas()
+    menu_bar = MyMenuBar(canvas)
+    window = QMainWindow()
+    window.setMenuBar(menu_bar)
+    window.setCentralWidget(canvas)
+    window.show()
+    sys.exit(app.exec_())

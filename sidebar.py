@@ -3,10 +3,41 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget
 from brush import BrushInput, Brush, Eraser, EraserInput
 import sys
 import os
 
+class Sidebar(QWidget):
+    def __init__(self, canvas):
+        super().__init__()
+        self.canvas = canvas
+
+        self.layout = QVBoxLayout()
+
+        self.brush_button = QPushButton("Brush")
+        self.brush_button.clicked.connect(self.set_brush_tool)
+        self.layout.addWidget(self.brush_button)
+
+        self.eraser_button = QPushButton("Eraser")
+        self.eraser_button.clicked.connect(self.set_eraser_tool)
+        self.layout.addWidget(self.eraser_button)
+
+        self.undo_button = QPushButton("Undo")
+        self.undo_button.clicked.connect(self.canvas.undo)
+        self.layout.addWidget(self.undo_button)
+
+        self.redo_button = QPushButton("Redo")
+        self.redo_button.clicked.connect(self.canvas.redo)
+        self.layout.addWidget(self.redo_button)
+
+        self.setLayout(self.layout)
+
+    def set_brush_tool(self):
+        self.canvas.set_tool(self.canvas.brush)
+
+    def set_eraser_tool(self):
+        self.canvas.set_tool(self.canvas.eraser)
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         self.prev_selected_color_button = None
@@ -98,6 +129,12 @@ class Sidebar(QtWidgets.QWidget):
         self.clear_layer_button = QPushButton('Clear Layer')
         self.clear_layer_button.clicked.connect(self.clear_layer)
 
+        self.fill_color_button = QPushButton('Fill in')
+        self.fill_color_button.clicked.connect(self.fill_color)
+
+        self.pickout_color_button = QPushButton('Pick color')
+        self.pickout_color_button.clicked.connect(self.pickout_color)
+
         layout.addLayout(button_layout)
         layout.addWidget(self.brush_size_label)
         layout.addWidget(size_slider)
@@ -107,6 +144,8 @@ class Sidebar(QtWidgets.QWidget):
         layout.addWidget(self.add_layer_button)
         layout.addWidget(self.remove_layer_button)
         layout.addWidget(self.clear_layer_button)
+        layout.addWidget(self.fill_color_button)
+        layout.addWidget(self.pickout_color_button)
 
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(5)
@@ -230,6 +269,15 @@ class Sidebar(QtWidgets.QWidget):
     def clear_layer(self):
         self.canvas.clear_layer()
         self.canvas.update_canvas()
+
+    def fill_color(self):
+        self.canvas.set_tool("fill")
+
+    def pickout_color(self, color):
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
+        brush.setColor(color)
+        brush.setStyle(Qt.SolidPattern)
 
     def start_drawing(self):
         if self.canvas.layers_count > 0:

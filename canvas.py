@@ -2,15 +2,9 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from brush import Brush, Eraser
 
-class Brush:
-    def __init__(self):
-        self.size = 5
-        self.color = Qt.black
 
-class Eraser:
-    def __init__(self):
-        self.size = 5
 
 class Canvas(QLabel):
     def __init__(self):
@@ -33,7 +27,7 @@ class Canvas(QLabel):
         self.undo_stack = []
         self.redo_stack = []
 
-        self.current_tool = self.brush  # Set the default tool
+        self.current_tool = self.brush
 
         self.add_layer()
         self.update_canvas()
@@ -90,8 +84,21 @@ class Canvas(QLabel):
         painter.drawPixmap(0, 0, self.pixmap())
 
     def save(self, filePath):
-        self.pixmap().save(filePath)
+        image = QImage(self.pixmap().size(), QImage.Format_RGB32)
+        painter = QPainter(image)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
+
+        painter.setBrush(Qt.white)
+        painter.drawRect(image.rect())
+
+        for line in self.lines:
+            painter.drawPixmap(0, 0, line)
+
+        painter.end()
+        image.save(filePath)
+        
     def add_layer(self, index=None):
         layer = QPixmap(1080, 720)
         layer.fill(Qt.transparent)

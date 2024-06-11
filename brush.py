@@ -6,17 +6,18 @@ from PyQt5.QtWidgets import *
 import sys
 
 class Brush:
-    def __init__(self, size=20):
+    def __init__(self, size=20, color=None):
         self.size = size
-        self.color = None
+        self.color = color if color else QtGui.QColor("black")
+        self.canvas = None
 
+    def set_canvas(self, canvas):
+        self.canvas = canvas 
     def set_color(self, color):
         print(f"Brush color changed to: {color}")
         self.color = color
-
-    def set_size(self, size):
-        self.size = size
-
+        if self.canvas: 
+            self.canvas.brush.color = color 
 class Eraser:
     def __init__(self, eraser_size=20, eraser_color=Qt.white):
         self.size = eraser_size

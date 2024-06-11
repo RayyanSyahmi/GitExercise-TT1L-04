@@ -149,23 +149,32 @@ class Sidebar(QtWidgets.QWidget):
         self.set_brush_color(0)
         self.set_brush_tool()
         
-    def set_brush_color(self, button):
-        if button == self.quick_color1:
-            color = self.quick_color1_color
-        elif button == self.quick_color2:
-            color = self.quick_color2_color
-        elif button == self.quick_color3:
-            color = self.quick_color3_color
-        elif button == self.quick_color4:
-            color = self.quick_color4_color
+    def set_brush_color(self, index):
+        if index == 0:
+            color = self.quick_color1.palette().button().color()
+        elif index == 1:
+            color = self.quick_color2.palette().button().color()
+        elif index == 2:
+            color = self.quick_color3.palette().button().color()
+        elif index == 3:
+            color = self.quick_color4.palette().button().color()
 
         if color:
-            self.brush.color = QtGui.QColor(color)
-            self.brush.set_color(self.brush.color)
-            self.selected_color = self.brush.color
+            self.brush.color = color
+            self.brush.set_color(color)
+            self.selected_color = color
         else:
             print("No color selected")
 
+        if index == 0:
+            self.prev_selected_color_button = self.quick_color1
+        elif index == 1:
+            self.prev_selected_color_button = self.quick_color2
+        elif index == 2:
+            self.prev_selected_color_button = self.quick_color3
+        elif index == 3:
+            self.prev_selected_color_button = self.quick_color4
+    
     def open_color_dialog(self, sender=None):
         color = QtWidgets.QColorDialog.getColor()
         if color.isValid():

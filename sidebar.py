@@ -141,9 +141,13 @@ class Sidebar(QtWidgets.QWidget):
         self.shape_size = 10
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
-        palette = self.palette()
-        palette.setColor(QtGui.QPalette.Window, Qt.white)
-        self.setPalette(palette)
+
+        # Load the background image
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        background_image_path = os.path.join(script_dir, 'icons', 'sidebar_background.png')
+        
+        # Set the background
+        self.set_background("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg")
 
         sidebar_layout = QtWidgets.QVBoxLayout()
         sidebar_layout.setSpacing(0)
@@ -292,6 +296,14 @@ class Sidebar(QtWidgets.QWidget):
 
         self.set_brush_color(0)
         self.set_brush_tool()
+    
+    def set_background(self, image_path):
+        if os.path.exists("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg"):
+            background_pixmap = QPixmap("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg")
+            background_pixmap = background_pixmap.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
+            palette = self.palette()
+            palette.setBrush(QPalette.Window, QBrush(background_pixmap))
+            self.setPalette(palette)
         
     def set_brush_color(self, index):
         color = self.custom_colors[index]

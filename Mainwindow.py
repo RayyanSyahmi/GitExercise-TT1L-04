@@ -1,39 +1,46 @@
 import sys
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QAction
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
-from canvasclass import Canvas
-
+from canvas import Canvas
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        self.vbox_layout = QVBoxLayout()
-        self.central_widget.setLayout(self.vbox_layout)
-
-        self.main_h_layout = QHBoxLayout()
-        self.vbox_layout.addLayout(self.main_h_layout)
 
         self.canvas = Canvas()
-        self.sidebar = Sidebar(self.canvas)
-        self.main_h_layout.addWidget(self.sidebar)
-        self.main_h_layout.addWidget(self.canvas)
+        self.setCentralWidget(self.canvas)
 
-        self.menu_bar = MyMenuBar()
+        self.sidebar = Sidebar(self.canvas)
+        self.dock_widget = QDockWidget("Tools", self)
+        self.dock_widget.setWidget(self.sidebar)
+        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
+
+        self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
-        
+
+        self.sidebar_toggle = QAction("Tools", self)
+        self.sidebar_toggle.triggered.connect(self.toggle_sidebar)
+        self.menu_bar.addAction(self.sidebar_toggle)
+
         self.move(0, 0)
         self.show()
 
-app = QApplication(sys.argv)
-app.setFont(QFont("Segoe UI", 9))
-app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
-main_window = MainWindow()
-main_window.show()
-sys.exit(app.exec_())
+    def toggle_sidebar(self):
+        if self.dock_widget.isVisible():
+            self.dock_widget.hide()
+            self.sidebar_toggle.setText("Tools")
+        else:
+            self.dock_widget.show()
+            self.sidebar_toggle.setText("Tools")
+            
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    app.setFont(QFont("Segoe UI", 9))
+    app.setStyleSheet("QPushButton{ font-family: 'Segoe UI'; font-size: 9pt; }")
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec_())

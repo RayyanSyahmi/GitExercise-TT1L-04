@@ -65,12 +65,6 @@ class Canvas(QtWidgets.QWidget):
     def clear_layer(self):
         self.layers[self.current_layer_index].fill(QtCore.Qt.transparent)
 
-    def undo(self):
-        print("Undo action")
-
-    def redo(self):
-        print("Redo action")
-
     def set_tool(self, tool):
         pass
 
@@ -105,14 +99,6 @@ class Sidebar(QWidget):
         self.eraser_button = QPushButton("Eraser")
         self.eraser_button.clicked.connect(self.set_eraser_tool)
         self.sidebar_layout.addWidget(self.eraser_button)
-
-        self.undo_button = QPushButton("Undo")
-        self.undo_button.clicked.connect(self.canvas.undo)
-        self.sidebar_layout.addWidget(self.undo_button)
-
-        self.redo_button = QPushButton("Redo")
-        self.redo_button.clicked.connect(self.canvas.redo)
-        self.sidebar_layout.addWidget(self.redo_button)
 
         self.setsidebar_Layout(self.sidebar_layout)
         self.update_layer_combo_box()
@@ -167,20 +153,6 @@ class Sidebar(QtWidgets.QWidget):
 
         brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
         erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
-        undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
-        redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
-
-        self.undo_button = QtWidgets.QPushButton()
-        self.undo_button.setFixedSize(50, 50)
-        self.undo_button.setIcon(QtGui.QIcon(undoicon))
-        self.undo_button.setToolTip('Undo')
-        self.undo_button.clicked.connect(canvas.undo)
-
-        self.redo_button = QtWidgets.QPushButton()
-        self.redo_button.setFixedSize(50, 50)
-        self.redo_button.setIcon(QtGui.QIcon(redoicon))
-        self.redo_button.setToolTip('Redo')
-        self.redo_button.clicked.connect(canvas.redo)
 
         self.brush_button = QtWidgets.QPushButton()
 
@@ -199,8 +171,6 @@ class Sidebar(QtWidgets.QWidget):
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.brush_button)
         button_layout.addWidget(self.eraser_button)
-        button_layout.addWidget(self.undo_button)
-        button_layout.addWidget(self.redo_button)
         button_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         self.quick_color1 = QPushButton()

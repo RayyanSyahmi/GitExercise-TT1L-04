@@ -64,23 +64,28 @@ class Canvas(QLabel):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.last_pos:
-            distance = QLineF(self.last_pos, event.pos()).length()
-            if distance > self.brush.size / 10000:
-                painter = QPainter(self.pixmap())
-                if self.current_tool == self.eraser:
-                    painter.setCompositionMode(QPainter.CompositionMode_Clear)
-                    pen = QPen(Qt.transparent, self.eraser.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-                else:
-                    pen = QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-                painter.setPen(pen)
-                painter.drawLine(self.last_pos, event.pos())
-                painter.end()
-                self.update()
-                self.last_pos = event.pos()
-                self.drawing_points.append(event.pos())
+            painter = QPainter(self.pixmap())
+            if self.current_tool == self.eraser:
+                painter.setCompositionMode(QPainter.CompositionMode_Clear)
+                pen = QPen(Qt.transparent, self.eraser.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+            else:
+                pen = QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
+            painter.setPen(pen)
+            painter.drawLine(self.last_pos, event.pos())
+            painter.end()
+            self.update()
+            self.last_pos = event.pos()
+            self.drawing_points.append(event.pos())
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.last_pos = None
 
     def update_brush_size(self, new_size):
         self.brush.size = new_size
+
+    def update_brush_color(self, new_color):
+        self.brush.color = new_color
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -88,6 +93,13 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(self.rect())
         painter.drawPixmap(0, 0, self.pixmap())
+            
+    def color_pickout(self, color,):
+        print ("pick")
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
+        brush.setColor(color)
+        brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
         self.pixmap().save(filePath)

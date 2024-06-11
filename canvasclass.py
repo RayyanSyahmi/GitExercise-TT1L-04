@@ -18,8 +18,6 @@ class Canvas(QtWidgets.QLabel):
         self.setPixmap(QtGui.QPixmap(1080, 720))
         pixmap = QtGui.QPixmap(1080, 720)
         pixmap.fill(QtCore.Qt.white)
-        painter = QtGui.QPainter(pixmap)
-        painter.end()
         self.setPixmap(pixmap)
         self.update()
         self.brush = Brush()

@@ -149,14 +149,14 @@ class Sidebar(QtWidgets.QWidget):
         self.set_brush_color(0)
         self.set_brush_tool()
         
-    def set_brush_color(self, index):
-        if index == 0:
+    def set_brush_color(self, button):
+        if button == self.quick_color1:
             color = self.quick_color1_color
-        elif index == 1:
+        elif button == self.quick_color2:
             color = self.quick_color2_color
-        elif index == 2:
+        elif button == self.quick_color3:
             color = self.quick_color3_color
-        elif index == 3:
+        elif button == self.quick_color4:
             color = self.quick_color4_color
 
         if color:
@@ -165,11 +165,6 @@ class Sidebar(QtWidgets.QWidget):
             self.selected_color = self.brush.color
         else:
             print("No color selected")
-
-        self.prev_selected_color_button = self.quick_color1 if index == 0 else \
-                                        self.quick_color2 if index == 1 else \
-                                        self.quick_color3 if index == 2 else \
-                                        self.quick_color4
 
     def open_color_dialog(self, sender=None):
         color = QtWidgets.QColorDialog.getColor()

@@ -68,12 +68,14 @@ class Canvas(QLabel):
                 brush = QBrush(gradient)
                 painter.setBrush(brush)
                 painter.setPen(Qt.NoPen)
-                painter.drawEllipse(QRectF(event.pos().x() - self.brush.size / 2, event.pos().y() - self.brush.size / 2, self.brush.size, self.brush.size))
+                ellipse_rect = QRectF(event.pos().x() - self.brush.size / 2, event.pos().y() - self.brush.size / 2, self.brush.size, self.brush.size)
+                painter.drawEllipse(ellipse_rect)
                 painter.end()
                 self.update()
                 self.last_pos = event.pos()
                 self.drawing_points.append(event.pos())
-            
+                self.lines.append((ellipse_rect, self.brush.color))
+    
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -93,10 +95,14 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
 
-        painter.setPen(QPen(self.brush.color))  # Set the pen color to self.brush.color
-        for line in self.lines:
-            x1, y1, x2, y2 = line  # Assuming line is a tuple of four coordinates
-            painter.drawLine(x1, y1, x2, y2)
+        for ellipse_rect, color in self.lines:
+            gradient = QRadialGradient(ellipse_rect.center(), ellipse_rect.width() / 2)
+            gradient.setColorAt(0, QColor(color))
+            gradient.setColorAt(1, Qt.transparent)
+
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QBrush(gradient))
+            painter.drawEllipse(ellipse_rect)
 
         painter.end()
         image.save(filePath)

@@ -93,8 +93,10 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
 
+        painter.setPen(QPen(self.brush.color))  # Set the pen color to self.brush.color
         for line in self.lines:
-            painter.drawPixmap(0, 0, line)
+            x1, y1, x2, y2 = line  # Assuming line is a tuple of four coordinates
+            painter.drawLine(x1, y1, x2, y2)
 
         painter.end()
         image.save(filePath)

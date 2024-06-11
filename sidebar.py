@@ -200,7 +200,6 @@ class Sidebar(QtWidgets.QWidget):
                 for button in quick_colors:
                     if sender == button and button != self.prev_selected_color_button:
                         button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                        button.original_style = "background-color: {};".format(color.name())
                         self.prev_selected_color_button = button
 
     def set_brush_tool(self):

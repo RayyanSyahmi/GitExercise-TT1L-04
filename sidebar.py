@@ -86,6 +86,7 @@ class Sidebar(QtWidgets.QWidget):
         self.color_button.clicked.connect(lambda: self.open_color_dialog(self.color_button))
         
         self.layer_combo_box = QtWidgets.QComboBox()
+        self.layer_combo_box.addItem("Layer 1")
         self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
         self.layer_combo_box.show()
 
@@ -216,9 +217,17 @@ class Sidebar(QtWidgets.QWidget):
         self.canvas.set_tool(self.eraser)
 
     def add_layer(self):
-        self.canvas.add_layer()
-        self.layer_combo_box.addItem('Layer {}'.format(self.canvas.layers_count))
-        self.layer_combo_box.setCurrentIndex(self.layer_combo_box.count() - 1)
+        new_layer_index = self.canvas.add_layer()
+        
+        new_layer_name = f'Layer {new_layer_index}'
+        self.layer_combo_box.addItem(new_layer_name)
+        self.layer_combo_box.setCurrentIndex(new_layer_index - 1)
+        
+        self.canvas.set_current_layer(new_layer_index)
+        
+        self.update_ui()
+        
+        print(f'Layer {new_layer_index} added successfully.')
 
     def change_current_layer(self, index):
         if index >= 0 and index < len(self.canvas.layers):

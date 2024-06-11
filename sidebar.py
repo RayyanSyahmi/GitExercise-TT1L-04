@@ -118,6 +118,7 @@ class Sidebar(QtWidgets.QWidget):
         self.clear_layer_button = QPushButton('Clear Layer')
         self.clear_layer_button.clicked.connect(self.clear_layer)
 
+        #add to sidebar
         layout.addLayout(button_layout)
         layout.addWidget(self.brush_size_label)
         layout.addWidget(size_slider)
@@ -140,46 +141,36 @@ class Sidebar(QtWidgets.QWidget):
         self.hide()
 
         #colors for quick select color
-        self.custom_colors = [QtGui.QColor("#000000"), QtGui.QColor("#FFFFFF"), QtGui.QColor("#007300"), QtGui.QColor("#FFFF00")]
-        self.selected_color = self.custom_colors[0]
+        self.quick_color1_color = "#000000"
+        self.quick_color2_color = "#FFFFFF"
+        self.quick_color3_color = "#007300"
+        self.quick_color4_color = "#FFFF00"
 
         self.set_brush_color(0)
         self.set_brush_tool()
         
     def set_brush_color(self, index):
-        color = self.custom_colors[index]
-        self.brush.color = color
-        self.brush.set_color(color)
-        self.selected_color = color
-
-        if self.prev_selected_color_button:
-            self.prev_selected_color_button.setStyleSheet(self.prev_selected_color_button.original_style)
-
         if index == 0:
-            self.quick_color1.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-            self.quick_color1.original_style = "background-color: {};".format(color.name())
+            color = self.quick_color1_color
         elif index == 1:
-            self.quick_color2.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-            self.quick_color2.original_style = "background-color: {};".format(color.name())
+            color = self.quick_color2_color
         elif index == 2:
-            self.quick_color3.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-            self.quick_color3.original_style = "background-color: {};".format(color.name())
+            color = self.quick_color3_color
         elif index == 3:
-            self.quick_color4.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-            self.quick_color4.original_style = "background-color: {};".format(color.name())
+            color = self.quick_color4_color
+
+        if color:
+            self.brush.color = QtGui.QColor(color)
+            self.brush.set_color(self.brush.color)
+            self.selected_color = self.brush.color
+        else:
+            print("No color selected")
 
         self.prev_selected_color_button = self.quick_color1 if index == 0 else \
                                         self.quick_color2 if index == 1 else \
                                         self.quick_color3 if index == 2 else \
                                         self.quick_color4
-    
-    def get_selected_color(self):
-        return self.selected_color
 
-    def update_slider_label(self, value):
-        self.brush_size_label.setText("Size: {}".format(value))
-
-    
     def open_color_dialog(self, sender=None):
         color = QtWidgets.QColorDialog.getColor()
         if color.isValid():
@@ -187,20 +178,24 @@ class Sidebar(QtWidgets.QWidget):
             self.brush.color = color
             self.brush.set_color(color)
 
-            if self.prev_selected_color_button:
-                self.prev_selected_color_button.setStyleSheet(self.prev_selected_color_button.original_style)
-
             if sender == self.color_button:
                 if self.prev_selected_color_button:
-                    self.prev_selected_color_button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                    self.prev_selected_color_button.original_style = "background-color: {};".format(color.name())
+                    self.prev_selected_color_button.setStyleSheet("background-color: {};".format(color.name()))
                 self.prev_selected_color_button = None
             else:
-                quick_colors = [self.quick_color1, self.quick_color2, self.quick_color3, self.quick_color4]
-                for button in quick_colors:
-                    if sender == button and button != self.prev_selected_color_button:
-                        button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                        self.prev_selected_color_button = button
+                sender.setStyleSheet("background-color: {};".format(color.name()))
+                if sender == self.quick_color1:
+                    self.quick_color1_color = color.name()
+                elif sender == self.quick_color2:
+                    self.quick_color2_color = color.name()
+                elif sender == self.quick_color3:
+                    self.quick_color3_color = color.name()
+                elif sender == self.quick_color4:
+                    self.quick_color4_color = color.name()
+                self.prev_selected_color_button = sender
+
+    def update_slider_label(self, value):
+        self.brush_size_label.setText("Size: {}".format(value))
 
     def set_brush_tool(self):
         self.active_tool = "Brush"
@@ -237,7 +232,7 @@ class Sidebar(QtWidgets.QWidget):
         if index >= 0 and index < len(self.canvas.layers):
             self.current_layer_index = index
             print(f"Current layer index: {index}")
-            if self.canvas.layers_count > 0:  # Check if there are any layers
+            if self.canvas.layers_count > 0:
                 self.canvas.update_canvas()
                 self.layer_combo_box.setItemText(index, f"Layer {index + 1}")
         else:

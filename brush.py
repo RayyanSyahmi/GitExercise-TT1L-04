@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import *
 import sys
 
 class Brush:
-    def __init__(self, size=20, color=Qt.black):
+    def __init__(self, size=20):
         self.size = size
-        self.color = color
+        self.color = None
 
     def set_color(self, color):
+        print(f"Brush color changed to: {color}")
         self.color = color
 
     def set_size(self, size):

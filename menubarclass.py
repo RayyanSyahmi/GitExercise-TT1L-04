@@ -3,7 +3,6 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from canvasclass import Canvas
 from canvas import Canvas
 import sys
 import os
@@ -13,28 +12,34 @@ class MyMenuBar(QtWidgets.QMenuBar):
         super().__init__()
         self.canvas = canvas
 
+        # File menu
         file_menu = self.addMenu("File")
-        file_menu.addAction("New")
-        file_menu.addAction("Open")
 
+        # Save action
         saveAction = QAction("Save", self)
         saveAction.triggered.connect(self.save)
-        self.save_action = file_menu.addAction(saveAction)
+        file_menu.addAction(saveAction)
+
+        # Path to icons
         script_dir = os.path.dirname(os.path.abspath(__file__))
         undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
         redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
 
+        # Undo action
         undo_action = QAction(QIcon(undoicon), 'Undo', self)
-        redo_action = QAction(QIcon(redoicon), 'Redo', self)
-
+        undo_action.triggered.connect(self.canvas.undo)
         self.addAction(undo_action)
+
+        # Redo action
+        redo_action = QAction(QIcon(redoicon), 'Redo', self)
+        redo_action.triggered.connect(self.canvas.redo)
         self.addAction(redo_action)
 
     def save(self):
         print("Save button pressed")
         filePath, _ = QFileDialog.getSaveFileName(self, "Save Image", "",
                         "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
-    
+
         if filePath == "":
             return
         self.canvas.save(filePath)

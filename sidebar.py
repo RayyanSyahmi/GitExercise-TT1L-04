@@ -8,73 +8,58 @@ from brush import BrushInput, Brush, Eraser, EraserInput
 import sys
 import os
 
-class Sidebar(QWidget):
-    def __init__(self, canvas):
-        super().__init__()
-        self.canvas = canvas
-
-        self.layout = QVBoxLayout()
-
-        self.brush_button = QPushButton("Brush")
-        self.brush_button.clicked.connect(self.set_brush_tool)
-        self.layout.addWidget(self.brush_button)
-
-        self.eraser_button = QPushButton("Eraser")
-        self.eraser_button.clicked.connect(self.set_eraser_tool)
-        self.layout.addWidget(self.eraser_button)
-
-        self.undo_button = QPushButton("Undo")
-        self.undo_button.clicked.connect(self.canvas.undo)
-        self.layout.addWidget(self.undo_button)
-
-        self.redo_button = QPushButton("Redo")
-        self.redo_button.clicked.connect(self.canvas.redo)
-        self.layout.addWidget(self.redo_button)
-
-        self.setLayout(self.layout)
-
-    def set_brush_tool(self):
-        self.canvas.set_tool(self.canvas.brush)
-
-    def set_eraser_tool(self):
-        self.canvas.set_tool(self.canvas.eraser)
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         self.prev_selected_color_button = None
         super().__init__()
 
+        #variables
         self.setFixedWidth(200)
         self.setAutoFillBackground(True)
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Window, Qt.white)
         self.setPalette(palette)
-
+        
+        #layout
         layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(0)
         self.setLayout(layout)
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        #import images
+        icons_folder = os.path.dirname(os.path.abspath(__file__))
+        brushicon = os.path.join(icons_folder, 'icons', 'brushicon.png')
+        erasericon = os.path.join(icons_folder, 'icons', 'erasericon.png')
+        fillicon =os.path.join(icons_folder, 'icons', 'fillicon.png')
 
-        brushicon = os.path.join(script_dir, 'icons', 'brushicon.png')
-        erasericon = os.path.join(script_dir, 'icons', 'erasericon.png')
-
+        #tools button
         self.brush_button = QPushButton()  
         self.brush_button.setFixedSize(50, 50)
-        self.brush_button.setIcon(QIcon(brushicon))  
-        self.brush_button.setToolTip('Brush Tool')  # Add tooltip for brush button
+        self.brush_button.setIcon(QIcon(brushicon)) 
+        self.brush_button.setIconSize(QSize(40, 40)) 
+        self.brush_button.setToolTip('Brush Tool')
         self.brush_button.clicked.connect(self.set_brush_tool)
 
         self.eraser_button = QPushButton()
         self.eraser_button.setFixedSize(50, 50)
-        self.eraser_button.setIcon(QIcon(erasericon)) 
-        self.eraser_button.setToolTip('Eraser Tool')  # Add tooltip for eraser button
+        self.eraser_button.setIcon(QIcon(erasericon))
+        self.eraser_button.setIconSize(QSize(40, 40)) 
+        self.eraser_button.setToolTip('Eraser Tool')
         self.eraser_button.clicked.connect(self.set_eraser_tool)
 
+        self.fill_button = QPushButton()  
+        self.fill_button.setFixedSize(50, 50)
+        self.fill_button.setIcon(QIcon(fillicon))
+        self.fill_button.setIconSize(QSize(40, 40))  
+        self.fill_button.setToolTip('Fill Tool')
+
+        #tools layout
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addWidget(self.brush_button)
         button_layout.addWidget(self.eraser_button)
+        button_layout.addWidget(self.fill_button)
         button_layout.setAlignment(Qt.AlignLeft)
 
+        #colors button
         self.quick_color1 = QPushButton()
         self.quick_color1.setFixedSize(30, 30)
         self.quick_color1.setStyleSheet("background-color: #000000")  # Black
@@ -95,31 +80,35 @@ class Sidebar(QtWidgets.QWidget):
         self.quick_color4.setStyleSheet("background-color: #FFFF00")  # Yellow
         self.quick_color4.clicked.connect(lambda: self.set_brush_color(3))
 
+        #colors layout
         quick_color_layout = QtWidgets.QHBoxLayout()
         quick_color_layout.addWidget(self.quick_color1)
         quick_color_layout.addWidget(self.quick_color2)
         quick_color_layout.addWidget(self.quick_color3)
         quick_color_layout.addWidget(self.quick_color4)
-
         quick_color_layout.addSpacing(2)
         quick_color_widget = QtWidgets.QWidget()
         quick_color_widget.setLayout(quick_color_layout)
 
+        #size label
         self.brush_size_label = QtWidgets.QLabel("Size: 20")
-
+        #size slider
         size_slider = QtWidgets.QSlider(Qt.Horizontal)
         size_slider.setMinimum(1)
         size_slider.setMaximum(100)
         size_slider.setValue(20)
         size_slider.valueChanged.connect(self.update_slider_label)
         
+        #color dialog
         self.color_button = QPushButton('Choose color')
         self.color_button.clicked.connect(lambda: self.open_color_dialog(self.color_button))
         
+        #layer combo box
         self.layer_combo_box = QtWidgets.QComboBox()
         self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
         self.layer_combo_box.show()
 
+        #layer buttons
         self.add_layer_button = QPushButton('Add Layer')
         self.add_layer_button.clicked.connect(self.add_layer)
 
@@ -128,12 +117,6 @@ class Sidebar(QtWidgets.QWidget):
 
         self.clear_layer_button = QPushButton('Clear Layer')
         self.clear_layer_button.clicked.connect(self.clear_layer)
-
-        self.fill_color_button = QPushButton('Fill in')
-        self.fill_color_button.clicked.connect(self.fill_color)
-
-        self.pickout_color_button = QPushButton('Pick color')
-        self.pickout_color_button.clicked.connect(self.pickout_color)
 
         layout.addLayout(button_layout)
         layout.addWidget(self.brush_size_label)
@@ -144,9 +127,6 @@ class Sidebar(QtWidgets.QWidget):
         layout.addWidget(self.add_layer_button)
         layout.addWidget(self.remove_layer_button)
         layout.addWidget(self.clear_layer_button)
-        layout.addWidget(self.fill_color_button)
-        layout.addWidget(self.pickout_color_button)
-
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(5)
 
@@ -157,9 +137,9 @@ class Sidebar(QtWidgets.QWidget):
         self.eraser_size_input = EraserInput(self.eraser, self.canvas)
         size_slider.valueChanged.connect(self.brush_size_input.update_brush_size)
         self.eraser_button.clicked.connect(self.set_eraser_tool)
-
         self.hide()
 
+        #colors for quick select color
         self.custom_colors = [QtGui.QColor("#000000"), QtGui.QColor("#FFFFFF"), QtGui.QColor("#007300"), QtGui.QColor("#FFFF00")]
         self.selected_color = self.custom_colors[0]
 
@@ -215,27 +195,19 @@ class Sidebar(QtWidgets.QWidget):
                     self.prev_selected_color_button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
                     self.prev_selected_color_button.original_style = "background-color: {};".format(color.name())
                 self.prev_selected_color_button = None
-            elif sender == self.quick_color1:
-                self.quick_color1.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                self.quick_color1.original_style = "background-color: {};".format(color.name())
-                self.prev_selected_color_button = self.quick_color1
-            elif sender == self.quick_color2:
-                self.quick_color2.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                self.quick_color2.original_style = "background-color: {};".format(color.name())
-                self.prev_selected_color_button = self.quick_color2
-            elif sender == self.quick_color3:
-                self.quick_color3.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                self.quick_color3.original_style = "background-color: {};".format(color.name())
-                self.prev_selected_color_button = self.quick_color3
-            elif sender == self.quick_color4:
-                self.quick_color4.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
-                self.quick_color4.original_style = "background-color: {};".format(color.name())
-                self.prev_selected_color_button = self.quick_color4
-    
+            else:
+                quick_colors = [self.quick_color1, self.quick_color2, self.quick_color3, self.quick_color4]
+                for button in quick_colors:
+                    if sender == button and button != self.prev_selected_color_button:
+                        button.setStyleSheet("background-color: {}; border: 2px solid #d5d5d5;".format(color.name()))
+                        button.original_style = "background-color: {};".format(color.name())
+                        self.prev_selected_color_button = button
+
     def set_brush_tool(self):
         self.active_tool = "Brush"
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: white; border: 2px solid #000000;")
         self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.fill_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.brush.color = self.selected_color
         self.brush.set_color(self.selected_color)
         self.canvas.set_tool(self.brush)
@@ -244,7 +216,18 @@ class Sidebar(QtWidgets.QWidget):
         self.active_tool = "Eraser"
         self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: white; border: 2px solid #000000;")
         self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.fill_button.setStyleSheet("background-color: #f0f0f0; color: black;")
         self.canvas.set_tool(self.eraser)
+
+    def set_fill_tool(self):
+        self.active_tool = "Fill"
+        self.fill_button.setStyleSheet("background-color: #f0f0f0; color: white; border: 2px solid #000000;")
+        self.brush_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.eraser_button.setStyleSheet("background-color: #f0f0f0; color: black;")
+        self.fill.color = self.selected_color
+        self.fill.set_color(self.selected_color)
+        self.canvas.set_tool(self.fill)
+        
 
     def add_layer(self):
         self.canvas.add_layer()
@@ -269,22 +252,6 @@ class Sidebar(QtWidgets.QWidget):
     def clear_layer(self):
         self.canvas.clear_layer()
         self.canvas.update_canvas()
-
-    def fill_color(self):
-        self.canvas.set_tool("fill")
-
-    def pickout_color(self, color):
-        painter = QtGui.QPainter(self.pixmap())
-        brush = QtGui.QBrush()
-        brush.setColor(color)
-        brush.setStyle(Qt.SolidPattern)
-
-    def start_drawing(self):
-        if self.canvas.layers_count > 0:
-            # Allow the user to draw
-            pass
-        else:
-            print("Please create a layer before drawing")
 
     def hide(self):
         self.setVisible(False)

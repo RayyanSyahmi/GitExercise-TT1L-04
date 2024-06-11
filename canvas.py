@@ -3,8 +3,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from brush import Brush, Eraser
-
-
+from sidebar import Sidebar
 
 class Canvas(QLabel):
     def __init__(self):
@@ -15,6 +14,7 @@ class Canvas(QLabel):
 
         self.brush = Brush()
         self.eraser = Eraser()
+        self.sidebar = Sidebar(self)
         self.setStyleSheet("background-color: white;")
 
         self.lines = []
@@ -56,23 +56,24 @@ class Canvas(QLabel):
             self.last_pos = event.pos()
             self.drawing_points.append(event.pos())
 
+
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.last_pos:
             distance = QLineF(self.last_pos, event.pos()).length()
             if distance > self.brush.size / 10000:
                 painter = QPainter(self.pixmap())
-                if self.current_tool == self.eraser:
-                    painter.setCompositionMode(QPainter.CompositionMode_Clear)
-                    pen = QPen(Qt.transparent, self.eraser.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-                else:
-                    pen = QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-                painter.setPen(pen)
-                painter.drawLine(self.last_pos, event.pos())
+                gradient = QRadialGradient(event.pos(), self.brush.size / 2)
+                gradient.setColorAt(0, self.brush.color)
+                gradient.setColorAt(1, Qt.transparent)
+                brush = QBrush(gradient)
+                painter.setBrush(brush)
+                painter.setPen(Qt.NoPen)
+                painter.drawEllipse(QRectF(event.pos().x() - self.brush.size / 2, event.pos().y() - self.brush.size / 2, self.brush.size, self.brush.size))
                 painter.end()
                 self.update()
                 self.last_pos = event.pos()
                 self.drawing_points.append(event.pos())
-
+            
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -88,7 +89,6 @@ class Canvas(QLabel):
         painter = QPainter(image)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setRenderHint(QPainter.SmoothPixmapTransform)
-
 
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())

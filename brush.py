@@ -16,18 +16,6 @@ class Brush:
     def set_size(self, size):
         self.size = size
 
-    def create_radial_gradient_brush(self, point):
-        gradient = QRadialGradient(point, self.size / 2)
-        gradient.setColorAt(0, self.color)
-        gradient.setColorAt(1, Qt.transparent)
-        return QBrush(gradient)
-
-    def draw_brush_at_point(self, painter, point):
-        brush = self.create_radial_gradient_brush(point)
-        painter.setBrush(brush)
-        painter.drawEllipse(QRectF(point.x() - self.size / 2, point.y() - self.size / 2, self.size, self.size))
-        painter.setPen(QtGui.QPen(QtCore.Qt.transparent))
-        
 class Eraser:
     def __init__(self, eraser_size=20, eraser_color=Qt.white):
         self.size = eraser_size

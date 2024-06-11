@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget
 from brush import BrushInput, Brush, Eraser, EraserInput
 import sys
 import os
@@ -75,7 +76,72 @@ class Canvas(QtWidgets.QWidget):
     def update_canvas(self):
         pass
 
+class Sidebar(QWidget):
+    def __init__(self, canvas):
+        super().__init__()
+        self.canvas = canvas
 
+        self.sidebar_layout = QVBoxLayout()  
+        self.sidebar_layout.setSpacing(0)
+        self.setsidebar_Layout(self.sidebar_layout)
+
+        self.add_layer_button = QPushButton('Add Layer')
+        self.add_layer_button.clicked.connect(self.add_layer)
+        self.sidebar_layout.addWidget(self.add_layer_button)
+
+        self.remove_layer_button = QPushButton('Remove Layer')
+        self.remove_layer_button.clicked.connect(self.remove_layer)
+        self.sidebar_layout.addWidget(self.remove_layer_button)
+
+        self.layer_combo_box = QComboBox()
+        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+        self.sidebar_layout.addWidget(self.layer_combo_box)
+
+        self.brush_button = QPushButton("Brush")
+        self.brush_button.clicked.connect(self.set_brush_tool)
+        self.sidebar_layout.addWidget(self.brush_button)
+
+        self.eraser_button = QPushButton("Eraser")
+        self.eraser_button.clicked.connect(self.set_eraser_tool)
+        self.sidebar_layout.addWidget(self.eraser_button)
+
+        self.undo_button = QPushButton("Undo")
+        self.undo_button.clicked.connect(self.canvas.undo)
+        self.sidebar_layout.addWidget(self.undo_button)
+
+        self.redo_button = QPushButton("Redo")
+        self.redo_button.clicked.connect(self.canvas.redo)
+        self.sidebar_layout.addWidget(self.redo_button)
+
+        self.setsidebar_Layout(self.sidebar_layout)
+        self.update_layer_combo_box()
+
+    def add_layer(self):
+        new_layer_index = self.canvas.add_layer()
+        self.layer_combo_box.addItem(f'Layer {new_layer_index}')
+        self.layer_combo_box.setCurrentIndex(new_layer_index - 1)
+        self.update_layer_combo_box()
+
+    def remove_layer(self):
+        self.canvas.remove_layer()
+        self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
+        self.update_layer_combo_box()
+
+    def change_current_layer(self, index):
+        self.canvas.set_current_layer(index)
+
+    def update_layer_combo_box(self):
+        self.layer_combo_box.clear()
+        for i in range(len(self.canvas.layers)):
+            self.layer_combo_box.addItem(f'Layer {i + 1}')
+        self.layer_combo_box.setCurrentIndex(self.canvas.current_layer_index)
+
+    def set_brush_tool(self):
+        self.canvas.set_tool(self.canvas.brush)
+
+    def set_eraser_tool(self):
+        self.canvas.set_tool(self.canvas.eraser)
+        
 class Sidebar(QtWidgets.QWidget):
     def __init__(self, canvas):
         self.prev_selected_color_button = None
@@ -87,9 +153,9 @@ class Sidebar(QtWidgets.QWidget):
         palette.setColor(QtGui.QPalette.Window, Qt.white)
         self.setPalette(palette)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(0)
-        self.setLayout(layout)
+        sidebar_layout = QtWidgets.QVBoxLayout()
+        sidebar_layout.setSpacing(0)
+        self.setLayout(sidebar_layout)
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -172,15 +238,16 @@ class Sidebar(QtWidgets.QWidget):
         self.color_button = QPushButton('Choose color')
         self.color_button.clicked.connect(lambda: self.open_color_dialog(self.color_button))
         
-        self.layer_combo_box = QtWidgets.QComboBox()
-        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
-        self.layer_combo_box.show()
-
         self.add_layer_button = QPushButton('Add Layer')
         self.add_layer_button.clicked.connect(self.add_layer)
 
         self.remove_layer_button = QPushButton('Remove Layer')
         self.remove_layer_button.clicked.connect(self.remove_layer)
+
+        self.layer_combo_box = QtWidgets.QComboBox()
+        self.layer_combo_box.addItem("Layer 1")
+        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+        self.layer_combo_box.show()
 
         self.clear_layer_button = QPushButton('Clear Layer')
         self.clear_layer_button.clicked.connect(self.clear_layer)
@@ -191,20 +258,20 @@ class Sidebar(QtWidgets.QWidget):
         self.pickout_color_button = QPushButton('Pick color')
         self.pickout_color_button.clicked.connect(self.pickout_color)
 
-        layout.addLayout(button_layout)
-        layout.addWidget(self.brush_size_label)
-        layout.addWidget(size_slider)
-        layout.addWidget(self.color_button)
-        layout.addWidget(quick_color_widget)
-        layout.addWidget(self.layer_combo_box)
-        layout.addWidget(self.add_layer_button)
-        layout.addWidget(self.remove_layer_button)
-        layout.addWidget(self.clear_layer_button)
-        layout.addWidget(self.fill_color_button)
-        layout.addWidget(self.pickout_color_button)
+        sidebar_layout.addLayout(button_layout)
+        sidebar_layout.addWidget(self.brush_size_label)
+        sidebar_layout.addWidget(size_slider)
+        sidebar_layout.addWidget(self.color_button)
+        sidebar_layout.addWidget(quick_color_widget)
+        sidebar_layout.addWidget(self.layer_combo_box)
+        sidebar_layout.addWidget(self.add_layer_button)
+        sidebar_layout.addWidget(self.remove_layer_button)
+        sidebar_layout.addWidget(self.clear_layer_button)
+        sidebar_layout.addWidget(self.fill_color_button)
+        sidebar_layout.addWidget(self.pickout_color_button)
 
-        layout.setAlignment(Qt.AlignTop)
-        layout.setSpacing(5)
+        sidebar_layout.setAlignment(Qt.AlignTop)
+        sidebar_layout.setSpacing(5)
 
         self.canvas = canvas
         self.brush = Brush()
@@ -303,28 +370,26 @@ class Sidebar(QtWidgets.QWidget):
         self.canvas.set_tool(self.eraser)
 
     def add_layer(self):
-        self.canvas.add_layer()
-        self.layer_combo_box.addItem('Layer {}'.format(self.canvas.layers_count))
-        self.layer_combo_box.setCurrentIndex(self.layer_combo_box.count() - 1)
-
-    def change_current_layer(self, index):
-        if index >= 0 and index < len(self.canvas.layers):
-            self.current_layer_index = index
-            print(f"Current layer index: {index}")
-            if self.canvas.layers_count > 0:  # Check if there are any layers
-                self.canvas.update_canvas()
-                self.layer_combo_box.setItemText(index, f"Layer {index + 1}")
-        else:
-            print("Error: Layer index is out of range.")
+        new_layer_index = self.canvas.add_layer()
+        self.layer_combo_box.addItem(f"Layer {new_layer_index}")
 
     def remove_layer(self):
-        if self.canvas.layers_count > 1:
+        current_index = self.layer_combo_box.currentIndex()
+        if current_index >= 0:
+            self.layer_combo_box.removeItem(current_index)
             self.canvas.remove_layer()
-            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
 
     def clear_layer(self):
         self.canvas.clear_layer()
-        self.canvas.update_canvas()
+
+    def change_current_layer(self, index):
+        self.canvas.set_current_layer(index)
+
+    def update_layer_combo_box(self):
+        self.layer_combo_box.clear()
+        for i in range(len(self.canvas.layers)):
+            self.layer_combo_box.addItem(f'Layer {i + 1}')
+        self.layer_combo_box.setCurrentIndex(self.canvas.current_layer_index)
 
     def fill_color(self):
         pass

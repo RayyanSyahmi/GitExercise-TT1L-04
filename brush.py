@@ -22,6 +22,7 @@ class Brush:
 
     def set_size(self, new_size):
         self.size = new_size
+        
 class Eraser:
     def __init__(self, eraser_size=20, eraser_color=Qt.white):
         self.size = eraser_size

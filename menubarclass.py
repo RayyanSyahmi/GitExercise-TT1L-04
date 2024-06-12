@@ -1,4 +1,4 @@
-import PyQt5 
+import PyQt5
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -47,9 +47,11 @@ class MyMenuBar(QtWidgets.QMenuBar):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     canvas = Canvas()
-    menu_bar = MyMenuBar(canvas)
     window = QMainWindow()
-    window.setMenuBar(menu_bar)
+    menubar = MyMenuBar(canvas)
+    window.setMenuBar(menubar)
     window.setCentralWidget(canvas)
+    window.setWindowTitle("Drawing App")
+    window.setGeometry(150, 150, 650, 450)
     window.show()
     sys.exit(app.exec_())

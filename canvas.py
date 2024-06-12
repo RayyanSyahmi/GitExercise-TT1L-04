@@ -23,13 +23,16 @@ class Canvas(QLabel):
         self.layers = []
         self.current_layer_index = 0
         self.layers_count = 1
+        self.layer_opacities = []
+        self.current_layer_index = 0
+
+        self.add_layer()
 
         self.undo_stack = []
         self.redo_stack = []
 
         self.current_tool = self.brush
 
-        self.add_layer()
         self.update_canvas()
 
     def save_state(self):
@@ -79,12 +82,22 @@ class Canvas(QLabel):
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
+    def update_brush_color(self, new_color):
+        self.brush.color = new_color
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         painter.setBrush(Qt.white)
         painter.drawRect(self.rect())
         painter.drawPixmap(0, 0, self.pixmap())
+            
+    def color_pickout(self, color):
+        print ("pick")
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
+        brush.setColor(color)
+        brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)
@@ -108,14 +121,14 @@ class Canvas(QLabel):
         image.save(filePath)
         
     def add_layer(self, index=None):
-        layer = QPixmap(1080, 720)
-        layer.fill(Qt.transparent)
+        new_layer = QPixmap(self.size())
+        new_layer.fill(Qt.transparent)
         if index is not None:
-            self.layers.insert(index, layer)
+            self.layers.insert(index, new_layer)
             self.layers_count += 1
             self.current_layer_index = index
         else:
-            self.layers.append(layer)
+            self.layers.append(new_layer)
             self.layers_count += 1
             self.current_layer_index = self.layers_count - 1
         self.change_current_layer(self.current_layer_index)

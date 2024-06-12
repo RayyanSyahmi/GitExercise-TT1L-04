@@ -1,4 +1,5 @@
 import PyQt5 
+import math
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -115,6 +116,21 @@ class Sidebar(QtWidgets.QWidget):
         self.remove_layer_button = QPushButton('Remove Layer')
         self.remove_layer_button.clicked.connect(self.remove_layer)
 
+        self.layer_combo_box = QtWidgets.QComboBox()
+        self.layer_combo_box.addItem("Layer 1")
+        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+        self.layer_combo_box.show()
+
+        self.shape_combo_box = QComboBox()
+        self.shape_combo_box.addItem('Pen')
+        self.shape_combo_box.addItem('Square')
+        self.shape_combo_box.addItem('Triangle')
+        self.shape_combo_box.addItem('Rectangle')
+        self.shape_combo_box.addItem('Circle')
+        self.shape_combo_box.addItem('Star')
+        self.shape_combo_box.currentIndexChanged.connect(self.change_shape)
+
+
         self.clear_layer_button = QPushButton('Clear Layer')
         self.clear_layer_button.clicked.connect(self.clear_layer)
 
@@ -148,6 +164,14 @@ class Sidebar(QtWidgets.QWidget):
 
         self.set_brush_color(0)
         self.set_brush_tool()
+    
+    def set_background(self, image_path):
+        if os.path.exists("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg"):
+            background_pixmap = QPixmap("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg")
+            background_pixmap = background_pixmap.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
+            palette = self.palette()
+            palette.setBrush(QPalette.Window, QBrush(background_pixmap))
+            self.setPalette(palette)
         
     def set_brush_color(self, index):
         if index == 0:
@@ -228,9 +252,14 @@ class Sidebar(QtWidgets.QWidget):
         
 
     def add_layer(self):
-        self.canvas.add_layer()
-        self.layer_combo_box.addItem('Layer {}'.format(self.canvas.layers_count))
-        self.layer_combo_box.setCurrentIndex(self.layer_combo_box.count() - 1)
+        layer_index = len(self.layers)
+        layer = QImage(1000, 800, QImage.Format_ARGB32)
+        layer.fill(Qt.transparent)
+        self.layers.append(layer)
+        self.layer_opacities.append(1.0)  # Default opacity to 100%
+
+        self.layer_combo_box.addItem(f"Layer {layer_index + 1}")
+        self.layer_combo_box.setCurrentIndex(layer_index)
 
     def change_current_layer(self, index):
         if index >= 0 and index < len(self.canvas.layers):
@@ -243,13 +272,110 @@ class Sidebar(QtWidgets.QWidget):
             print("Error: Layer index is out of range.")
 
     def remove_layer(self):
-        if self.canvas.layers_count > 1:
-            self.canvas.remove_layer()
-            self.layer_combo_box.removeItem(self.layer_combo_box.currentIndex())
+        if len(self.layers) > 1:
+            self.layers.pop()
+            self.layer_opacities.pop()
+            self.layer_combo_box.removeItem(len(self.layers))
+            self.current_layer_index = min(self.current_layer_index, len(self.layers) - 1)
+            self.update_canvas()
 
     def clear_layer(self):
-        self.canvas.clear_layer()
-        self.canvas.update_canvas()
+        if self.current_layer_index < len(self.layers):
+            self.layers[self.current_layer_index].fill(Qt.transparent)
+            self.update_canvas()
+
+    def change_current_layer(self, index):
+        if index < len(self.layer_opacities):
+            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
+            self.current_layer_index = index
+            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.update_canvas()
+
+    def update_layer_combo_box(self):
+        self.layer_combo_box.clear()
+        for i in range(len(self.canvas.layers)):
+            self.layer_combo_box.addItem(f'Layer {i + 1}')
+        self.layer_combo_box.setCurrentIndex(self.canvas.current_layer_index)
+
+    def change_current_layer(self, index):
+        if index < len(self.layer_opacities):
+            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
+            self.current_layer_index = index
+            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.update_canvas()
+
+    def change_layer_opacity(self, value):
+        self.layer_opacities[self.current_layer_index] = value / 100.0
+        self.update_canvas()
+
+    def change_shape(self, index):
+        shapes = ["Pen", "Square", "Triangle", "Rectangle", "Circle", "Star"]
+        self.shape = shapes[index]
+
+    def change_shape_size(self, size):
+        self.shape_size = size
+
+    def draw_shape(self, pos):
+        painter = QPainter(self.layers[self.current_layer_index])
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        painter.setBrush(Qt.NoBrush)
+
+        if self.shape == "Square":
+            painter.drawRect(QRect(pos.x() - self.shape_size // 2, pos.y() - self.shape_size // 2, self.shape_size, self.shape_size))
+        elif self.shape == "Triangle":
+            path = QPainterPath()
+            path.moveTo(pos.x(), pos.y() - self.shape_size // 2)
+            path.lineTo(pos.x() - self.shape_size // 2, pos.y() + self.shape_size // 2)
+            path.lineTo(pos.x() + self.shape_size // 2, pos.y() + self.shape_size // 2)
+            path.closeSubpath()
+            painter.drawPath(path)
+        elif self.shape == "Rectangle":
+            painter.drawRect(QRect(pos.x() - self.shape_size, pos.y() - self.shape_size // 2, self.shape_size * 2, self.shape_size))
+        elif self.shape == "Circle":
+            painter.drawEllipse(pos, self.shape_size // 2, self.shape_size // 2)
+        elif self.shape == "Star":
+            path = QPainterPath()
+            outer_radius = self.shape_size
+            inner_radius = outer_radius * 0.5
+            for i in range(10):
+                angle = i * math.pi / 5  # 36 degrees
+                if i % 2 == 0:
+                    x = pos.x() + outer_radius * math.cos(angle)
+                    y = pos.y() - outer_radius * math.sin(angle)
+                else:
+                    x = pos.x() + inner_radius * math.cos(angle)
+                    y = pos.y() - inner_radius * math.sin(angle)
+                if i == 0:
+                    path.moveTo(x, y)
+                else:
+                    path.lineTo(x, y)
+            path.closeSubpath()
+            painter.drawPath(path)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            local_pos = self.canvas_label.mapFrom(self, event.pos())
+            if self.shape == "Pen":
+                self.draw_brush(local_pos)
+            else:
+                self.draw_shape(local_pos)
+            self.update_canvas()
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton and self.shape == "Pen":
+            local_pos = self.canvas_label.mapFrom(self, event.pos())
+            self.draw_brush(local_pos)
+            self.update_canvas()
+
+    def update_canvas(self):
+        self.canvas_pixmap.fill(Qt.white)
+        painter = QPainter(self.canvas_pixmap)
+        for i, layer in enumerate(self.layers):
+            painter.setOpacity(self.layer_opacities[i])
+            painter.drawImage(0, 0, layer)
+        painter.end()
+        self.canvas_label.setPixmap(self.canvas_pixmap)
 
     def hide(self):
         self.setVisible(False)

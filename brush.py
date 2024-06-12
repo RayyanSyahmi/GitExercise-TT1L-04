@@ -13,11 +13,15 @@ class Brush:
 
     def set_canvas(self, canvas):
         self.canvas = canvas 
+
     def set_color(self, color):
         print(f"Brush color changed to: {color}")
         self.color = color
         if self.canvas: 
-            self.canvas.brush.color = color 
+            self.canvas.brush.color = color
+
+    def set_size(self, new_size):
+        self.size = new_size
 class Eraser:
     def __init__(self, eraser_size=20, eraser_color=Qt.white):
         self.size = eraser_size

@@ -1,10 +1,19 @@
 import sys
+import os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QAction
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
 from canvas import Canvas
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -36,7 +45,7 @@ class MainWindow(QMainWindow):
         else:
             self.dock_widget.show()
             self.sidebar_toggle.setText("Tools")
-            
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setFont(QFont("Segoe UI", 9))

@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDockWidget, QAction
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         else:
             self.dock_widget.show()
             self.sidebar_toggle.setText("Tools")
-
+            
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setFont(QFont("Segoe UI", 9))

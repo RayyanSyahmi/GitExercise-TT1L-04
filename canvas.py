@@ -1,10 +1,9 @@
 import sys
-import os
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import Qt, QPoint 
-from PyQt5.QtGui import QColor, QPixmap, QPainter, QPen 
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QSlider, QComboBox, QColorDialog, QHBoxLayout
-from brush import Brush, Eraser, BrushInput, EraserInput
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from brush import Brush, Eraser
+from sidebar import Sidebar
 
 class Canvas(QLabel):
     def __init__(self):
@@ -13,8 +12,9 @@ class Canvas(QLabel):
         pixmap.fill(Qt.white)
         self.setPixmap(pixmap)
 
-        self.brush = None
-        self.eraser = None
+        self.brush = Brush()
+        self.eraser = Eraser()
+        self.sidebar = Sidebar(self)
         self.setStyleSheet("background-color: white;")
 
         self.lines = []
@@ -31,7 +31,7 @@ class Canvas(QLabel):
         self.undo_stack = []
         self.redo_stack = []
 
-        self.current_tool = self.brush  # Set the default tool
+        self.current_tool = self.brush
 
         self.update_canvas()
 
@@ -59,32 +59,31 @@ class Canvas(QLabel):
             self.last_pos = event.pos()
             self.drawing_points.append(event.pos())
 
+
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.last_pos:
-            painter = QPainter(self.pixmap())
-            if self.current_tool == self.eraser:
-                painter.setCompositionMode(QPainter.CompositionMode_Clear)
-                pen = QPen(Qt.transparent, self.eraser.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-            else:
-                pen = QPen(self.brush.color, self.brush.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
-            painter.setPen(pen)
-            painter.drawLine(self.last_pos, event.pos())
-            painter.end()
-            self.update()
-            self.last_pos = event.pos()
-            self.drawing_points.append(event.pos())
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.last_pos = None
-
+            distance = QLineF(self.last_pos, event.pos()).length()
+            if distance > self.brush.size / 10000:
+                painter = QPainter(self.pixmap())
+                gradient = QRadialGradient(event.pos(), self.brush.size / 2)
+                gradient.setColorAt(0, self.brush.color)
+                gradient.setColorAt(1, Qt.transparent)
+                brush = QBrush(gradient)
+                painter.setBrush(brush)
+                painter.setPen(Qt.NoPen)
+                ellipse_rect = QRectF(event.pos().x() - self.brush.size / 2, event.pos().y() - self.brush.size / 2, self.brush.size, self.brush.size)
+                painter.drawEllipse(ellipse_rect)
+                painter.end()
+                self.update()
+                self.last_pos = event.pos()
+                self.drawing_points.append(event.pos())
+                self.lines.append((ellipse_rect, self.brush.color))
+    
     def update_brush_size(self, new_size):
-        if self.brush:
-            self.brush.size = new_size
+        self.brush.size = new_size
 
     def update_brush_color(self, new_color):
-        if self.brush:
-            self.brush.color = new_color
+        self.brush.color = new_color
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -101,28 +100,63 @@ class Canvas(QLabel):
         brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
-        self.pixmap().save(filePath)
+        image = QImage(self.pixmap().size(), QImage.Format_RGB32)
+        painter = QPainter(image)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
-    def add_layer(self):
+        painter.setBrush(Qt.white)
+        painter.drawRect(image.rect())
+
+        for ellipse_rect, color in self.lines:
+            gradient = QRadialGradient(ellipse_rect.center(), ellipse_rect.width() / 2)
+            gradient.setColorAt(0, QColor(color))
+            gradient.setColorAt(1, Qt.transparent)
+
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(QBrush(gradient))
+            painter.drawEllipse(ellipse_rect)
+
+        painter.end()
+        image.save(filePath)
+        
+    def add_layer(self, index=None):
         new_layer = QPixmap(self.size())
         new_layer.fill(Qt.transparent)
-        self.layers.append(new_layer)
-        self.current_layer_index = len(self.layers) - 1
-        self.update()
+        if index is not None:
+            self.layers.insert(index, new_layer)
+            self.layers_count += 1
+            self.current_layer_index = index
+        else:
+            self.layers.append(new_layer)
+            self.layers_count += 1
+            self.current_layer_index = self.layers_count - 1
+        self.change_current_layer(self.current_layer_index)
+        if self.layers_count > 1:
+            self.update_canvas()
 
-    def delete_current_layer(self):
-        if len(self.layers) > 1:
+    def remove_layer(self):
+        if self.layers_count > 1:
+            if self.current_layer_index < 0 or self.current_layer_index >= self.layers_count:
+                self.current_layer_index = 0
+            print(f"Removing layer at index {self.current_layer_index}")
             del self.layers[self.current_layer_index]
-            self.current_layer_index = max(0, self.current_layer_index - 1)
-            self.update()
+            self.layers_count -= 1
+            self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
 
     def change_current_layer(self, index):
         self.current_layer_index = index
         self.update_canvas()
 
-    def clear_current_layer(self):
-        self.layers[self.current_layer_index].fill(Qt.transparent)
-        self.update()
+    def clear_layer(self):
+        if self.layers_count > 0:
+            try:
+                self.layers[self.current_layer_index - 1].fill(Qt.transparent)
+                self.update_canvas()
+            except IndexError:
+                print(f"Error: Unable to fill layer {self.current_layer_index}. Index is out of range.")
+        else:
+            print("Error: No layers to clear.")
 
     def update_canvas(self):
         if self.layers_count > 0 and self.current_layer_index < len(self.layers):

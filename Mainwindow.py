@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
 from canvas import Canvas
+from brush import Brush, Eraser, BrushInput, EraserInput
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -19,6 +20,12 @@ class MainWindow(QMainWindow):
         self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
 
+        self.brush = Brush()
+        self.eraser = Eraser()
+
+        self.brush_input = BrushInput(self.brush, self.canvas)
+        self.eraser_input = EraserInput(self.eraser, self.canvas)
+
         self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
 
@@ -28,6 +35,17 @@ class MainWindow(QMainWindow):
 
         self.move(0, 0)
         self.show()
+
+        clear_action = QAction('Clear Layer', self)
+        clear_action.triggered.connect(self.canvas.clear_current_layer)
+
+        delete_action = QAction('Delete Layer', self)
+        delete_action.triggered.connect(self.canvas.delete_current_layer)
+
+        menubar = self.menuBar()
+        file_menu = menubar.addMenu('File')
+        file_menu.addAction(clear_action)
+        file_menu.addAction(delete_action)
 
     def toggle_sidebar(self):
         if self.dock_widget.isVisible():

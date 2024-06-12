@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt
 from menubarclass import MyMenuBar
 from sidebar import Sidebar
 from canvas import Canvas
+from brush import Brush, Eraser, BrushInput, EraserInput
 
 def resource_path(relative_path):
     try:
@@ -28,6 +29,12 @@ class MainWindow(QMainWindow):
         self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
 
+        self.brush = Brush()
+        self.eraser = Eraser()
+
+        self.brush_input = BrushInput(self.brush, self.canvas)
+        self.eraser_input = EraserInput(self.eraser, self.canvas)
+
         self.menu_bar = MyMenuBar(self.canvas)
         self.setMenuBar(self.menu_bar)
 
@@ -38,13 +45,67 @@ class MainWindow(QMainWindow):
         self.move(0, 0)
         self.show()
 
+        clear_action = QAction('Clear Layer', self)
+        clear_action.triggered.connect(self.canvas.clear_current_layer)
+
+        delete_action = QAction('Delete Layer', self)
+        delete_action.triggered.connect(self.canvas.delete_current_layer)
+
+        menubar = self.menuBar()
+        file_menu = menubar.addMenu('File')
+        file_menu.addAction(clear_action)
+        file_menu.addAction(delete_action)
+
     def toggle_sidebar(self):
         if self.dock_widget.isVisible():
             self.dock_widget.hide()
             self.sidebar_toggle.setText("Tools")
         else:
             self.dock_widget.show()
-            self.sidebar_toggle.setText("Tools")
+            self.sidebar_toggle.setText("Hide Tools")
+
+    def fill_selection(self, start, end):
+        if start and end:
+            selection_rect = QRect(start, end)
+            for layer in self.layers:
+                painter = QtGui.QPainter(layer)
+                painter.setCompositionMode(QPainter.CompositionMode_Source)
+                painter.fillRect(selection_rect, self.fill_color)
+                painter.end()
+            self.update_canvas()
+
+    def fill(self, point):
+        target_color = self.canvas.pixmap().toImage().pixelColor(point)
+        if target_color == self.canvas.brush.color:
+            return  # No need to fill if the target color is the same as the fill color
+
+        stack = [point]
+        while stack:
+            current_point = stack.pop()
+            x, y = current_point.x(), current_point.y()
+            if x < 0 or y < 0 or x >= self.canvas.pixmap().width() or y >= self.canvas.pixmap().height():
+                continue
+
+            current_color = self.canvas.pixmap().toImage().pixelColor(current_point)
+            if current_color == target_color:
+                painter = QtGui.QPainter(self.canvas.pixmap())
+                painter.setPen(self.canvas.brush.color)
+                painter.drawPoint(current_point)
+                painter.end()
+
+                stack.append(QPoint(x + 1, y))
+                stack.append(QPoint(x - 1, y))
+                stack.append(QPoint(x, y + 1))
+                stack.append(QPoint(x, y - 1))
+
+        self.canvas.update()
+
+    def contextMenuEvent(self, event):
+        menu = QMenu(self)
+        fill_action = menu.addAction("Fill Selection")
+        action = menu.exec_(self.mapToGlobal(event.pos()))
+        if action == fill_action:
+            self.fill_selection(self.selection_start, self.selection_end)
             
 if __name__ == "__main__":
     app = QApplication(sys.argv)

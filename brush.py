@@ -74,6 +74,27 @@ class BrushInput(QtWidgets.QWidget):
 class EraserInput(QtWidgets.QWidget):
     def __init__(self, eraser, canvas):
         super().__init__()
-
         self.canvas = canvas
         self.eraser = eraser
+        self.eraser_size_input = QtWidgets.QLineEdit(self)
+        self.eraser_size_input.setPlaceholderText("Eraser size")
+        self.eraser_size_input.setGeometry(10, 10, 80, 20)
+        self.eraser_size_input.returnPressed.connect(self.set_eraser_size_from_input)
+
+        self.canvas.eraser = self.eraser
+
+    @pyqtSlot(int)
+    def update_eraser_size(self, new_size):
+        self.eraser_size_input.setText(str(new_size))
+        self.eraser.set_size(new_size)
+        self.canvas.eraser.size = new_size
+
+    def set_eraser_size_from_input(self):
+        try:
+            if self.eraser_size_input.text():
+                self.eraser.size = int(self.eraser_size_input.text())
+                self.eraser.set_size(self.eraser.size)
+                self.canvas.eraser.size = self.eraser.size
+                self.eraser_size_input.clear()
+        except ValueError:
+            pass

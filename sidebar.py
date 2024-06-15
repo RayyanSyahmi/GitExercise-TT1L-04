@@ -20,6 +20,11 @@ class Sidebar(QtWidgets.QWidget):
         palette = self.palette()
         palette.setColor(QtGui.QPalette.Window, Qt.white)
         self.setPalette(palette)
+        self.canvas = canvas
+        self.layers = []
+        self.layer_opacities = [1.0]
+        self.current_layer_index = 0
+        self.pixmap = self.canvas.pixmap
         
         #layout
         layout = QtWidgets.QVBoxLayout()
@@ -113,6 +118,13 @@ class Sidebar(QtWidgets.QWidget):
         self.add_layer_button = QPushButton('Add Layer')
         self.add_layer_button.clicked.connect(self.add_layer)
 
+        self.layer_opacity_label = QtWidgets.QLabel("Opacity: 100%")
+        self.layer_opacity = QtWidgets.QSlider(Qt.Horizontal)
+        self.layer_opacity.setMinimum(1)
+        self.layer_opacity.setMaximum(100)
+        self.layer_opacity.setValue(100)
+        self.layer_opacity.valueChanged.connect(self.update_opacity)
+
         self.remove_layer_button = QPushButton('Remove Layer')
         self.remove_layer_button.clicked.connect(self.remove_layer)
 
@@ -164,6 +176,7 @@ class Sidebar(QtWidgets.QWidget):
 
         self.set_brush_color(0)
         self.set_brush_tool()
+        self.add_layer()
     
     def set_background(self, image_path):
         if os.path.exists("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg"):
@@ -299,12 +312,12 @@ class Sidebar(QtWidgets.QWidget):
 
     def change_current_layer(self, index):
         if index < len(self.layer_opacities):
-            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
+            self.layer_opacities[self.current_layer_index] = self.layer_opacity.value() / 100.0
             self.current_layer_index = index
-            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.layer_opacity.setValue(int(self.layer_opacities[index] * 100))
             self.update_canvas()
 
-    def change_layer_opacity(self, value):
+    def update_opacity(self, value):
         self.layer_opacities[self.current_layer_index] = value / 100.0
         self.update_canvas()
 
@@ -369,13 +382,13 @@ class Sidebar(QtWidgets.QWidget):
             self.update_canvas()
 
     def update_canvas(self):
-        self.canvas_pixmap.fill(Qt.white)
-        painter = QPainter(self.canvas_pixmap)
+        self.pixmap.fill(Qt.white)
+        painter = QPainter(self.pixmap)
         for i, layer in enumerate(self.layers):
             painter.setOpacity(self.layer_opacities[i])
             painter.drawImage(0, 0, layer)
         painter.end()
-        self.canvas_label.setPixmap(self.canvas_pixmap)
+        self.canvas_label.setPixmap(self.pixmap)
 
     def hide(self):
         self.setVisible(False)

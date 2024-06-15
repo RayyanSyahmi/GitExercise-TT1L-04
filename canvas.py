@@ -77,7 +77,7 @@ class Canvas(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.last_pos = None
-
+    
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -90,31 +90,23 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(self.rect())
         painter.drawPixmap(0, 0, self.pixmap())
-
+            
     def color_pickout(self, color):
-        print("pick")
-        painter = QPainter(self.pixmap())
-        brush = QBrush()
+        print ("pick")
+        painter = QtGui.QPainter(self.pixmap())
+        brush = QtGui.QBrush()
         brush.setColor(color)
         brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)
         painter = QPainter(image)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
 
-        for ellipse_rect, color in self.lines:
-            gradient = QRadialGradient(ellipse_rect.center(), ellipse_rect.width() / 2)
-            gradient.setColorAt(0, QColor(color))
-            gradient.setColorAt(1, Qt.transparent)
-
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(QBrush(gradient))
-            painter.drawEllipse(ellipse_rect)
+        pixmap = self.pixmap().copy()
+        painter.drawPixmap(0, 0, pixmap)
 
         painter.end()
         image.save(filePath)

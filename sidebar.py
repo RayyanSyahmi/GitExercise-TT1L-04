@@ -123,6 +123,11 @@ class Sidebar(QtWidgets.QWidget):
         self.remove_layer_button = QPushButton('Remove Layer')
         self.remove_layer_button.clicked.connect(self.remove_layer)
 
+        self.layer_combo_box = QtWidgets.QComboBox()
+        self.layer_combo_box.addItem("Layer 1")
+        self.layer_combo_box.currentIndexChanged.connect(self.change_current_layer)
+        self.layer_combo_box.show()
+
         self.shape_combo_box = QComboBox()
         self.shape_combo_box.addItem('Pen')
         self.shape_combo_box.addItem('Square')
@@ -166,8 +171,6 @@ class Sidebar(QtWidgets.QWidget):
 
         self.set_brush_color(0)
         self.set_brush_tool()
-
-        self.add_layer()
     
     def set_background(self, image_path):
         if os.path.exists("C:/Users/User/OneDrive/Desktop/f7188d253ebe032b9eb678e43e78c2bf.jpg"):
@@ -260,6 +263,7 @@ class Sidebar(QtWidgets.QWidget):
         layer = QImage(1000, 800, QImage.Format_ARGB32)
         layer.fill(Qt.transparent)
         self.layers.append(layer)
+        self.layer_opacities.append(1.0)  # Default opacity to 100%
 
         self.layer_combo_box.addItem(f"Layer {layer_index + 1}")
         self.layer_combo_box.setCurrentIndex(layer_index)
@@ -277,16 +281,22 @@ class Sidebar(QtWidgets.QWidget):
     def remove_layer(self):
         if len(self.layers) > 1:
             self.layers.pop()
+            self.layer_opacities.pop()
             self.layer_combo_box.removeItem(len(self.layers))
             self.current_layer_index = min(self.current_layer_index, len(self.layers) - 1)
+            self.update_canvas()
 
     def clear_layer(self):
         if self.current_layer_index < len(self.layers):
             self.layers[self.current_layer_index].fill(Qt.transparent)
+            self.update_canvas()
 
     def change_current_layer(self, index):
         if index < len(self.layer_opacities):
+            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
             self.current_layer_index = index
+            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.update_canvas()
 
     def update_layer_combo_box(self):
         self.layer_combo_box.clear()
@@ -295,7 +305,15 @@ class Sidebar(QtWidgets.QWidget):
         self.layer_combo_box.setCurrentIndex(self.canvas.current_layer_index)
 
     def change_current_layer(self, index):
-        self.current_layer_index = index
+        if index < len(self.layer_opacities):
+            self.layer_opacities[self.current_layer_index] = self.opacity_slider.value() / 100.0
+            self.current_layer_index = index
+            self.opacity_slider.setValue(int(self.layer_opacities[index] * 100))
+            self.update_canvas()
+
+    def change_layer_opacity(self, value):
+        self.layer_opacities[self.current_layer_index] = value / 100.0
+        self.update_canvas()
 
     def change_shape(self, index):
         shapes = ["Pen", "Square", "Triangle", "Rectangle", "Circle", "Star"]

@@ -101,8 +101,6 @@ class Canvas(QLabel):
     def save(self, filePath):
         image = QImage(self.pixmap().size(), QImage.Format_RGB32)
         painter = QPainter(image)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
 
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())

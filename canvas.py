@@ -27,9 +27,10 @@ class Canvas(QLabel):
         self.drawing_points = []
 
         self.layers = []
-        self.current_layer_index = 0
         self.layers_count = 1
-        self.layer_opacities = []
+        self.layers = [QImage(self.size(), QImage.Format_ARGB32)]
+        self.layers[0].fill(Qt.transparent)
+        self.layer_opacities = [1.0]
         self.current_layer_index = 0
 
         self.add_layer()
@@ -130,15 +131,15 @@ class Canvas(QLabel):
         new_layer.fill(Qt.transparent)
         if index is not None:
             self.layers.insert(index, new_layer)
-            self.layers_count += 1
+            self.layer_opacities.insert(index, 1.0)
             self.current_layer_index = index
         else:
             self.layers.append(new_layer)
-            self.layers_count += 1
-            self.current_layer_index = self.layers_count - 1
+            self.layer_opacities.append(1.0)
+            self.current_layer_index = self.layers_count
+        self.layers_count += 1
         self.change_current_layer(self.current_layer_index)
-        if self.layers_count > 1:
-            self.update_canvas()
+        self.update_canvas()
 
     def delete_current_layer(self):
         if self.layers_count > 1:
@@ -146,17 +147,20 @@ class Canvas(QLabel):
                 self.current_layer_index = 0
             print(f"Removing layer at index {self.current_layer_index}")
             del self.layers[self.current_layer_index]
+            del self.layer_opacities[self.current_layer_index]
             self.layers_count -= 1
             self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
+            self.update_canvas()
 
     def change_current_layer(self, index):
         self.current_layer_index = index
+        self.sidebar.layer_opacity.setValue(int(self.layer_opacities[index] * 100))
         self.update_canvas()
 
     def clear_current_layer(self):
         if self.layers_count > 0:
             try:
-                self.layers[self.current_layer_index - 1].fill(Qt.transparent)
+                self.layers[self.current_layer_index].fill(Qt.transparent)
                 self.update_canvas()
             except IndexError:
                 print(f"Error: Unable to fill layer {self.current_layer_index}. Index is out of range.")
@@ -169,11 +173,9 @@ class Canvas(QLabel):
             pixmap.fill(Qt.transparent)
             painter = QPainter(pixmap)
             painter.setRenderHint(QPainter.Antialiasing)
-            for layer in self.layers[:self.current_layer_index]:
-                painter.setOpacity(0.5)
-                painter.drawPixmap(0, 0, layer)
-            painter.setOpacity(1.0)
-            painter.drawPixmap(0, 0, self.layers[self.current_layer_index])
+            for i, layer in enumerate(self.layers):
+                painter.setOpacity(self.layer_opacities[i])
+                painter.drawPixmap(0, 0, layer if isinstance(layer, QPixmap) else QPixmap.fromImage(layer))
             painter.end()
             self.setPixmap(pixmap)
 

@@ -59,7 +59,6 @@ class Canvas(QLabel):
             self.last_pos = event.pos()
             self.drawing_points.append(event.pos())
 
-
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.last_pos:
             distance = QLineF(self.last_pos, event.pos()).length()
@@ -108,18 +107,12 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(image.rect())
 
-        for ellipse_rect, color in self.lines:
-            gradient = QRadialGradient(ellipse_rect.center(), ellipse_rect.width() / 2)
-            gradient.setColorAt(0, QColor(color))
-            gradient.setColorAt(1, Qt.transparent)
-
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(QBrush(gradient))
-            painter.drawEllipse(ellipse_rect)
+        pixmap = self.pixmap().copy()
+        painter.drawPixmap(0, 0, pixmap)
 
         painter.end()
         image.save(filePath)
-        
+
     def add_layer(self, index=None):
         new_layer = QPixmap(self.size())
         new_layer.fill(Qt.transparent)

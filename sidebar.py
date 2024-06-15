@@ -37,21 +37,21 @@ class Sidebar(QtWidgets.QWidget):
         self.brush_button.setFixedSize(50, 50)
         self.brush_button.setIcon(QIcon(brushicon)) 
         self.brush_button.setIconSize(QSize(40, 40)) 
-        self.brush_button.setToolTip('Brush Tool')
+        self.brush_button.setToolTip('Brush')
         self.brush_button.clicked.connect(self.set_brush_tool)
 
         self.eraser_button = QPushButton()
         self.eraser_button.setFixedSize(50, 50)
         self.eraser_button.setIcon(QIcon(erasericon))
         self.eraser_button.setIconSize(QSize(40, 40)) 
-        self.eraser_button.setToolTip('Eraser Tool')
+        self.eraser_button.setToolTip('Eraser')
         self.eraser_button.clicked.connect(self.set_eraser_tool)
 
         self.fill_button = QPushButton()  
         self.fill_button.setFixedSize(50, 50)
         self.fill_button.setIcon(QIcon(fillicon))
         self.fill_button.setIconSize(QSize(40, 40))  
-        self.fill_button.setToolTip('Fill Tool')
+        self.fill_button.setToolTip('Fill')
 
         #tools layout
         button_layout = QtWidgets.QHBoxLayout()

@@ -1,7 +1,13 @@
 import sys
+import os
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import Qt, QPoint 
+from PyQt5.QtGui import QColor, QPixmap, QPainter, QPen 
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QSlider, QComboBox, QColorDialog, QHBoxLayout
+from brush import Brush, Eraser, BrushInput, EraserInput
 from brush import Brush, Eraser
 from sidebar import Sidebar
 
@@ -126,7 +132,7 @@ class Canvas(QLabel):
         if self.layers_count > 1:
             self.update_canvas()
 
-    def remove_layer(self):
+    def delete_current_layer(self):
         if self.layers_count > 1:
             if self.current_layer_index < 0 or self.current_layer_index >= self.layers_count:
                 self.current_layer_index = 0
@@ -139,7 +145,7 @@ class Canvas(QLabel):
         self.current_layer_index = index
         self.update_canvas()
 
-    def clear_layer(self):
+    def clear_current_layer(self):
         if self.layers_count > 0:
             try:
                 self.layers[self.current_layer_index - 1].fill(Qt.transparent)

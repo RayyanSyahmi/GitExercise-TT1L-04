@@ -65,27 +65,9 @@ class Canvas(QLabel):
             self.last_pos = event.pos()
             self.drawing_points.append(event.pos())
 
-
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton and self.last_pos:
-            distance = QLineF(self.last_pos, event.pos()).length()
-            if distance > self.brush.size / 10000:
-                painter = QPainter(self.pixmap())
-                gradient = QRadialGradient(event.pos(), self.brush.size / 2)
-                gradient.setColorAt(0, self.brush.color)
-                gradient.setColorAt(1, Qt.transparent)
-                brush = QBrush(gradient)
-                painter.setBrush(brush)
-                painter.setPen(Qt.NoPen)
-                ellipse_rect = QRectF(event.pos().x() - self.brush.size / 2, event.pos().y() - self.brush.size / 2, self.brush.size, self.brush.size)
-                painter.drawEllipse(ellipse_rect)
-                painter.end()
-                self.update()
-                self.last_pos = event.pos()
-                self.drawing_points.append(event.pos())
-                self.lines.append((ellipse_rect, self.brush.color))
-
-                painter = QPainter(self.pixmap())
+            painter = QPainter(self.pixmap())
             if self.current_tool == self.eraser:
                 painter.setCompositionMode(QPainter.CompositionMode_Clear)
                 pen = QPen(Qt.transparent, self.eraser.size, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
@@ -101,7 +83,7 @@ class Canvas(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.last_pos = None
-    
+
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -114,11 +96,11 @@ class Canvas(QLabel):
         painter.setBrush(Qt.white)
         painter.drawRect(self.rect())
         painter.drawPixmap(0, 0, self.pixmap())
-            
+
     def color_pickout(self, color):
-        print ("pick")
-        painter = QtGui.QPainter(self.pixmap())
-        brush = QtGui.QBrush()
+        print("pick")
+        painter = QPainter(self.pixmap())
+        brush = QBrush()
         brush.setColor(color)
         brush.setStyle(Qt.SolidPattern)
 
@@ -142,7 +124,7 @@ class Canvas(QLabel):
 
         painter.end()
         image.save(filePath)
-        
+
     def add_layer(self, index=None):
         new_layer = QPixmap(self.size())
         new_layer.fill(Qt.transparent)

@@ -1,11 +1,17 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-
 a = Analysis(
     ['Mainwindow.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\fillicon.png', 'Icons'),
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\redoicon.png', 'Icons'),
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\undoicon.png', 'Icons'),
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\brushicon.png', 'Icons'),
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\erasericon.png', 'Icons')
+        ('C:\\Users\\User\\OneDrive\\Desktop\\GitExercise\\GitExercise-TT1L-04\\Icons\\sidebarbg.jpg', 'Icons')
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

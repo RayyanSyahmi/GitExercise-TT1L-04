@@ -24,6 +24,9 @@ class MyMenuBar(QtWidgets.QMenuBar):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         undoicon = os.path.join(script_dir, 'icons', 'undoicon.png')
         redoicon = os.path.join(script_dir, 'icons', 'redoicon.png')
+        icons_folder = os.path.dirname(os.path.abspath(__file__))
+        undoicon = os.path.join(icons_folder, 'icons', 'undoicon.png')
+        redoicon = os.path.join(icons_folder,'icons', 'redoicon.png')
 
         # Undo action
         undo_action = QAction(QIcon(undoicon), 'Undo', self)

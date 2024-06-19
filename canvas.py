@@ -1,10 +1,15 @@
 import sys
 import os
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QPoint 
 from PyQt5.QtGui import QColor, QPixmap, QPainter, QPen 
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QLabel, QSlider, QComboBox, QColorDialog, QHBoxLayout
+from brush import Brush, Eraser, BrushInput, EraserInput
 from brush import Brush, Eraser
+from sidebar import Sidebar
 
 class Canvas(QLabel):
     def __init__(self):
@@ -15,15 +20,17 @@ class Canvas(QLabel):
 
         self.brush = Brush()
         self.eraser = Eraser()
+        self.sidebar = Sidebar(self)
         self.setStyleSheet("background-color: white;")
 
         self.lines = []
         self.drawing_points = []
 
         self.layers = []
-        self.current_layer_index = 0
         self.layers_count = 1
-        self.layer_opacities = []
+        self.layers = [QImage(self.size(), QImage.Format_ARGB32)]
+        self.layers[0].fill(Qt.transparent)
+        self.layer_opacities = [1.0]
         self.current_layer_index = 0
 
         self.add_layer()
@@ -31,7 +38,7 @@ class Canvas(QLabel):
         self.undo_stack = []
         self.redo_stack = []
 
-        self.current_tool = self.brush  # Set the default tool
+        self.current_tool = self.brush
 
         self.update_canvas()
 
@@ -77,7 +84,7 @@ class Canvas(QLabel):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.last_pos = None
-
+    
     def update_brush_size(self, new_size):
         self.brush.size = new_size
 
@@ -99,40 +106,53 @@ class Canvas(QLabel):
         brush.setStyle(Qt.SolidPattern)
 
     def save(self, filePath):
-        self.pixmap().save(filePath)
+        image = QImage(self.pixmap().size(), QImage.Format_RGB32)
+        painter = QPainter(image)
+
+        painter.setBrush(Qt.white)
+        painter.drawRect(image.rect())
+
+        pixmap = self.pixmap().copy()
+        painter.drawPixmap(0, 0, pixmap)
+
+        painter.end()
+        image.save(filePath)
 
     def add_layer(self, index=None):
         new_layer = QPixmap(self.size())
         new_layer.fill(Qt.transparent)
         if index is not None:
             self.layers.insert(index, new_layer)
-            self.layers_count += 1
+            self.layer_opacities.insert(index, 1.0)
             self.current_layer_index = index
         else:
             self.layers.append(new_layer)
-            self.layers_count += 1
-            self.current_layer_index = self.layers_count - 1
+            self.layer_opacities.append(1.0)
+            self.current_layer_index = self.layers_count
+        self.layers_count += 1
         self.change_current_layer(self.current_layer_index)
-        if self.layers_count > 1:
-            self.update_canvas()
+        self.update_canvas()
 
-    def remove_layer(self):
+    def delete_current_layer(self):
         if self.layers_count > 1:
             if self.current_layer_index < 0 or self.current_layer_index >= self.layers_count:
                 self.current_layer_index = 0
             print(f"Removing layer at index {self.current_layer_index}")
             del self.layers[self.current_layer_index]
+            del self.layer_opacities[self.current_layer_index]
             self.layers_count -= 1
             self.current_layer_index = min(self.current_layer_index, self.layers_count - 1)
+            self.update_canvas()
 
     def change_current_layer(self, index):
         self.current_layer_index = index
+        self.sidebar.layer_opacity.setValue(int(self.layer_opacities[index] * 100))
         self.update_canvas()
 
-    def clear_layer(self):
+    def clear_current_layer(self):
         if self.layers_count > 0:
             try:
-                self.layers[self.current_layer_index - 1].fill(Qt.transparent)
+                self.layers[self.current_layer_index].fill(Qt.transparent)
                 self.update_canvas()
             except IndexError:
                 print(f"Error: Unable to fill layer {self.current_layer_index}. Index is out of range.")
@@ -145,11 +165,9 @@ class Canvas(QLabel):
             pixmap.fill(Qt.transparent)
             painter = QPainter(pixmap)
             painter.setRenderHint(QPainter.Antialiasing)
-            for layer in self.layers[:self.current_layer_index]:
-                painter.setOpacity(0.5)
-                painter.drawPixmap(0, 0, layer)
-            painter.setOpacity(1.0)
-            painter.drawPixmap(0, 0, self.layers[self.current_layer_index])
+            for i, layer in enumerate(self.layers):
+                painter.setOpacity(self.layer_opacities[i])
+                painter.drawPixmap(0, 0, layer if isinstance(layer, QPixmap) else QPixmap.fromImage(layer))
             painter.end()
             self.setPixmap(pixmap)
 
